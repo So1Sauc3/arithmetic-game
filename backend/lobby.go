@@ -15,7 +15,7 @@ type Lobby struct {
 	id       int
 	register chan *Client
 
-	lobbyRead chan ClientMessage
+	lobbyRead chan ClientLobbyMessage
 
 	clientsMu sync.Mutex
 
@@ -36,7 +36,7 @@ func newLobby(id int, hub *Hub) *Lobby {
 		id:       id,
 		register: make(chan *Client),
 
-		lobbyRead: make(chan ClientMessage),
+		lobbyRead: make(chan ClientLobbyMessage),
 
 		clients: make(map[ClientId]*Client),
 
@@ -54,7 +54,7 @@ func (l *Lobby) run() {
 	l.log("running")
 	l.open = true
 
-	startGameTimer := time.NewTimer(10 * time.Second)
+	startGameTimer := time.NewTimer(1 * time.Second)
 
 	clientId := 0
 
@@ -78,17 +78,26 @@ startGameLoop:
 		client.difficulty = 1
 		client.playing.Store(true)
 
+		client.scoreMult = 1.0
+		client.coinMult = 1.0
+
 		question, expectedResult := GenerateQuestion(client.difficulty)
 
 		client.expectedResult = expectedResult
 
-		client.write <- NewQuestion{question}
+		client.write <- NewQuestion{
+			Difficulty: byte(client.difficulty),
+			Question:   question,
+		}
 	}
 
 	for msg := range l.lobbyRead {
-		switch msg.(type) {
-		case PowerupPurchase:
-			// TODO: implement powerups
+		switch msg := msg.(type) {
+		case ClientLobbySubmission:
+			l.broadcast(OpponentScoreChanged{
+				PlayerID: byte(msg.ClientID),
+				NewScore: uint32(msg.NewScore),
+			})
 		}
 	}
 }

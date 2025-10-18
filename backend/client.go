@@ -20,7 +20,7 @@ type Client struct {
 	hub *Hub
 
 	// roomWrite chan PendingMessage
-	read  chan ClientMessage
+	read  chan ClientLobbyMessage
 	write chan ServerMessage
 
 	closed atomic.Bool
@@ -31,8 +31,8 @@ type Client struct {
 	score          uint
 	coins          uint
 
-	scoreMult float64
-	coinMult  float64
+	scoreMult float32
+	coinMult  float32
 
 	difficulty uint
 	answered   uint
@@ -63,19 +63,17 @@ func (c *Client) readPump() {
 			break
 		}
 
-		c.log("received client message: %d", clientMessage.Opcode())
+		c.log("received client message: %d %T",
+			clientMessage.Opcode(), clientMessage)
 
 		switch clientMessage := clientMessage.(type) {
-		case Register:
-			c.read <- clientMessage
 
-		case Submission:
+		case *Submission:
 			if !c.playing.Load() {
 				break
 			}
+
 			if c.expectedResult != int(clientMessage.Answer) {
-				c.log("Wrong answer: expected %d, got %d",
-					c.expectedResult, clientMessage.Answer)
 				break
 			}
 
@@ -95,21 +93,73 @@ func (c *Client) readPump() {
 				NewCoins: uint32(c.coins),
 			}
 
-			// TODO: broadcast
+			c.read <- ClientLobbySubmission{
+				ClientID: c.id,
+				NewScore: c.score,
+			}
 
 			question, expectedResult := GenerateQuestion(c.difficulty)
 			c.expectedResult = expectedResult
 
-			c.write <- NewQuestion{question}
+			c.write <- NewQuestion{
+				Difficulty: byte(c.difficulty),
+				Question:   question,
+			}
 
-		case PowerupPurchase:
+		case *PowerupPurchase:
 			if clientMessage.PowerupID >= byte(len(Powerups)) {
 				c.log("received invalid powerup id: %d",
 					clientMessage.PowerupID)
 				break
 			}
 
-			c.read <- clientMessage
+			powerup := Powerups[clientMessage.PowerupID]
+
+			if powerup.cost > c.coins {
+				break
+			}
+
+			c.coins -= powerup.cost
+
+			switch clientMessage.PowerupID {
+
+			case CoinMultPowerup:
+				c.coinMult += 0.2
+				c.write <- MultipliersChanged{
+					ScoreMult: c.scoreMult,
+					CoinMult:  c.coinMult,
+				}
+
+			case ScoreMultPowerup:
+				c.scoreMult += 0.1
+				c.write <- MultipliersChanged{
+					ScoreMult: c.scoreMult,
+					CoinMult:  c.coinMult,
+				}
+
+			case SkipQuestionPowerup:
+				question, expectedResult := GenerateQuestion(c.difficulty)
+				c.expectedResult = expectedResult
+				c.write <- NewQuestion{
+					Question:   question,
+					Difficulty: byte(c.difficulty),
+				}
+
+			case EasyModePowerup:
+				c.difficulty--
+				c.answered = 0
+
+				question, expectedResult := GenerateQuestion(c.difficulty)
+				c.expectedResult = expectedResult
+				c.write <- NewQuestion{
+					Question:   question,
+					Difficulty: byte(c.difficulty),
+				}
+			}
+
+			c.write <- PurchaseConfirmed{
+				NewCoins: uint32(c.coins),
+			}
 		}
 	}
 }
