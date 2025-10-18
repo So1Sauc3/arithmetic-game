@@ -112,6 +112,8 @@ func (l *Lobby) registerClient(c *Client) bool {
 
 	c.write <- LobbyGreeting{Players: players}
 
+	l.clients[c.id] = c
+
 	l.activeClientCount.Add(1)
 	full := l.activeClientCount.Load() == ClientsPerLobby
 
