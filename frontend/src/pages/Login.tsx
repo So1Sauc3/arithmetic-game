@@ -52,7 +52,7 @@ function NameEntry() {
 export default function Login() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-5">
-      <h1 className="text-2xl font-bold mb-8">Login</h1>
+      <h1 className="text-2xl font-bold mb-8 text-white">Login</h1>
       <div className="flex gap-4 max-w-4xl w-full">
         <div className="flex-1">
           <NameEntry />

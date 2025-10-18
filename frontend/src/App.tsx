@@ -5,7 +5,7 @@ import Login from './pages/Login'
 import Game from './pages/Game'
 import Lobby from './pages/Lobby'
 
-import ParticlesBackground from './components/ui/ParticlesBackground'
+import ParticlesBackground from './components/ParticlesBackground'
 
 export default function App() {
   return (

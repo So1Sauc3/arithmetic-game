@@ -117,7 +117,7 @@ export default function Lobby() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-5">
       <div className="flex justify-between items-center w-full max-w-4xl mb-8">
-        <h1 className="text-2xl font-bold">Lobby</h1>
+        <h1 className="text-2xl font-bold text-white">Lobby</h1>
         <button 
           onClick={handleLeaveLobby}
           className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"

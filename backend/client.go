@@ -20,8 +20,9 @@ type Client struct {
 	hub *Hub
 
 	// roomWrite chan PendingMessage
-	read  chan ClientLobbyMessage
-	write chan ServerMessage
+	read       chan ClientLobbyMessage
+	write      chan ServerMessage
+	unregister chan *Client
 
 	closed atomic.Bool
 
@@ -162,6 +163,13 @@ func (c *Client) readPump() {
 			}
 		}
 	}
+
+	c.log("unregistering")
+
+	c.closed.Store(true)
+	close(c.write)
+
+	c.unregister <- c
 }
 
 func (c *Client) writePump() {
