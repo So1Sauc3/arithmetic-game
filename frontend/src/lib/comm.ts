@@ -315,25 +315,69 @@ ws.onmessage = function(e) {
 
 export type Socket = {
     socket: WebSocket
-    onMessage: (arg0: (arg0: ServerMessage) => void) => void
-    send: (arg0: ClientMessage) => void
+    lowlevel: {
+        onMessage: (arg0: (arg0: ServerMessage) => void) => void
+        send: (arg0: ClientMessage) => void
+    }
+    onHubHello: (arg0: (arg0: HubHello) => void) => void,
+    onLobbyHello: (arg0: (arg0: LobbyHello) => void) => void,
+    onNewPlayer: (arg0: (arg0: NewPlayer) => void) => void,
+    onCorrectSubmission: (arg0: (arg0: CorrectSubmission) => void) => void,
+    onNewQuestion: (arg0: (arg0: NewQuestion) => void) => void,
+    onPurchaseConfirmed: (arg0: (arg0: PurchaseConfirmed) => void) => void,
+    onStatusChanged: (arg0: (arg0: StatusChanged) => void) => void,
+    onOpponentStatusChanged: (arg0: (arg0: OpponentStatusChanged) => void) => void,
+    onEliminated: (arg0: (arg0: Eliminated) => void) => void,
+    onOpponentEliminated: (arg0: (arg0: OpponentEliminated) => void) => void,
+    onMultipliersChanged: (arg0: (arg0: MultipliersChanged) => void) => void,
+    sendSubmit: (answer: number) => void
+    sendPurchase: (powerup: PowerupId, target: number) => void
 }
 
-export async function connect(url: string, name: string) {
-    const socket = new WebSocket(url + "?name=" + name);
+async function connect_raw(url: string): Promise<Socket> {
+    const socket = new WebSocket(url);
     socket.binaryType = "arraybuffer";
 
     socket.addEventListener("message", (event) => {
         console.log(parseServerMessage(event.data));
     });
 
+    function callIfOpCode<T extends ServerMessage>(handler: (arg0: T) => void, code: typeof ServerOp[keyof typeof ServerOp]) {
+        socket.addEventListener("message", (event: MessageEvent<any>) => {
+            const message = parseServerMessage(event.data);
+            if (message.opcode != code)
+                return
+            handler(message as T)
+        })
+    }
+
     return {
         socket,
-        onMessage: (handler: (arg0: ServerMessage) => void) => {
-            socket.addEventListener("message", (event: MessageEvent<any>) => handler(parseServerMessage(event.data)))
+        lowlevel: {
+            onMessage: (handler: (arg0: ServerMessage) => void) => {
+                socket.addEventListener("message", (event: MessageEvent<any>) => handler(parseServerMessage(event.data)))
+            },
+            send: (message: ClientMessage) => {
+                socket.send(serializeClientMessage(message))
+            },
         },
-        send: (message: ClientMessage) => {
-            socket.send(serializeClientMessage(message))
-        },
+        onHubHello: (handler: (arg0: HubHello) => void) => callIfOpCode(handler, ServerOp.HubHello),
+        onLobbyHello: (handler: (arg0: LobbyHello) => void) => callIfOpCode(handler, ServerOp.LobbyHello),
+        onNewPlayer: (handler: (arg0: NewPlayer) => void) => callIfOpCode(handler, ServerOp.NewPlayer),
+        onCorrectSubmission: (handler: (arg0: CorrectSubmission) => void) => callIfOpCode(handler, ServerOp.CorrectSubmission),
+        onNewQuestion: (handler: (arg0: NewQuestion) => void) => callIfOpCode(handler, ServerOp.NewQuestion),
+        onPurchaseConfirmed: (handler: (arg0: PurchaseConfirmed) => void) => callIfOpCode(handler, ServerOp.PurchaseConfirmed),
+        onStatusChanged: (handler: (arg0: StatusChanged) => void) => callIfOpCode(handler, ServerOp.StatusChanged),
+        onOpponentStatusChanged: (handler: (arg0: OpponentStatusChanged) => void) => callIfOpCode(handler, ServerOp.OpponentStatusChanged),
+        onEliminated: (handler: (arg0: Eliminated) => void) => callIfOpCode(handler, ServerOp.Eliminated),
+        onOpponentEliminated: (handler: (arg0: OpponentEliminated) => void) => callIfOpCode(handler, ServerOp.OpponentEliminated),
+        onMultipliersChanged: (handler: (arg0: MultipliersChanged) => void) => callIfOpCode(handler, ServerOp.MultipliersChanged),
+        sendSubmit: (answer: number) => { socket.send(serializeClientMessage({ opcode: ClientOp.Submit, answer })) },
+        sendPurchase: (powerup: PowerupId, targetId: number) => { socket.send(serializeClientMessage({ opcode: ClientOp.Purchase, powerup, targetId })) },
     };
+}
+
+export async function connect(name: string): Promise<Socket> {
+    const proto = (window.location.protocol == "http:") ? "ws://" : "wss://"
+    return await connect_raw(`${proto}${window.location.host}/ws\?name=${name}`)
 }
