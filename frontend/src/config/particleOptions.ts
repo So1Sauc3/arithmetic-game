@@ -33,7 +33,7 @@ export const particlesOptions = {
     },
     opacity: { value: 0.5 },
   shape: { type: "star" },
-    size: { random: true, value: 5 },
+    size: { random: true, value: 3 },
   },
   detectRetina: true,
   interactivity: {
