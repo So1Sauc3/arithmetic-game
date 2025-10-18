@@ -21,7 +21,7 @@ function NameEntry() {
   const handleLogin = () => {
     console.log('Login button clicked');
     console.log('User entered name:', name);
-    navigate('/game')
+    navigate('/lobby')
   }
 
   return (
@@ -34,9 +34,9 @@ function NameEntry() {
         className="mr-2 px-3 py-1 border border-gray-300 rounded"
       />
       <button 
-        className={`px-4 py-2 rounded text-white ${
+        className={`px-4 py-2 rounded text-white transition-all duration-150 active:scale-95 ${
           name.trim() 
-            ? 'bg-blue-500 hover:bg-blue-600 cursor-pointer' 
+            ? 'bg-blue-500 hover:bg-blue-600 cursor-pointer hover:scale-105' 
             : 'bg-gray-400 cursor-not-allowed'
         }`}
         onClick={handleLogin}
