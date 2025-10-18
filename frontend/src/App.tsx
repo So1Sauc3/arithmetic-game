@@ -1,11 +1,14 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
+import * as comm from './lib/comm.ts'
 
 import Login from './pages/Login'
 import Game from './pages/Game'
 import ParticlesBackground from './components/ui/ParticlesBackground'
 
 export default function App() {
+  (window as any).sockets = comm;
+
   return (
     <div className="app-root">
       {/* ParticlesBackground is rendered once and positioned behind everything */}
