@@ -160,6 +160,12 @@ func (c *Client) readPump() {
 					Question:   question,
 					Difficulty: byte(c.difficulty),
 				}
+
+			case DoubleTapPowerup, CoinLeakPowerup, HardModePowerup:
+				c.read <- ClientLobbyStatusEffect{
+					ClientID: int(clientMessage.AffectedPlayer),
+					Powerup: clientMessage.PowerupID,
+				}
 			}
 
 			c.write <- PurchaseConfirmed{
