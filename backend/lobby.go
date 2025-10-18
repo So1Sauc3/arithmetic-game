@@ -54,7 +54,7 @@ func (l *Lobby) run() {
 	l.log("running")
 	l.open = true
 
-	startGameTimer := time.NewTimer(10 * time.Second)
+	startGameTimer := time.NewTimer(1 * time.Second)
 
 	clientId := 0
 
@@ -78,16 +78,22 @@ startGameLoop:
 		client.difficulty = 1
 		client.playing.Store(true)
 
+		client.scoreMult = 1.0
+		client.coinMult = 1.0
+
 		question, expectedResult := GenerateQuestion(client.difficulty)
 
 		client.expectedResult = expectedResult
 
-		client.write <- NewQuestion{question}
+		client.write <- NewQuestion{
+			Difficulty: byte(client.difficulty),
+			Question:   question,
+		}
 	}
 
 	for msg := range l.lobbyRead {
 		switch msg.(type) {
-		case PowerupPurchase:
+		case *PowerupPurchase:
 			// TODO: implement powerups
 		}
 	}

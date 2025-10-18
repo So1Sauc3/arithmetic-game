@@ -63,19 +63,19 @@ func (c *Client) readPump() {
 			break
 		}
 
-		c.log("received client message: %d", clientMessage.Opcode())
+		c.log("received client message: %d %T",
+			clientMessage.Opcode(), clientMessage)
 
 		switch clientMessage := clientMessage.(type) {
-		case Register:
+		case *Register:
 			c.read <- clientMessage
 
-		case Submission:
+		case *Submission:
 			if !c.playing.Load() {
 				break
 			}
+
 			if c.expectedResult != int(clientMessage.Answer) {
-				c.log("Wrong answer: expected %d, got %d",
-					c.expectedResult, clientMessage.Answer)
 				break
 			}
 
@@ -100,9 +100,12 @@ func (c *Client) readPump() {
 			question, expectedResult := GenerateQuestion(c.difficulty)
 			c.expectedResult = expectedResult
 
-			c.write <- NewQuestion{question}
+			c.write <- NewQuestion{
+				Difficulty: byte(c.difficulty),
+				Question:   question,
+			}
 
-		case PowerupPurchase:
+		case *PowerupPurchase:
 			if clientMessage.PowerupID >= byte(len(Powerups)) {
 				c.log("received invalid powerup id: %d",
 					clientMessage.PowerupID)

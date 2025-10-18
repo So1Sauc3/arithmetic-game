@@ -25,9 +25,9 @@ type Register struct {
 	Name string
 }
 
-func (Register) Opcode() byte { return OpcodeRegister }
+func (*Register) Opcode() byte { return OpcodeRegister }
 
-func (r Register) UnmarshalBinary(data []byte) error {
+func (r *Register) UnmarshalBinary(data []byte) error {
 	if len(data) < 2 {
 		return errors.New("register message too short")
 	}
@@ -48,9 +48,9 @@ type Submission struct {
 	Answer int32
 }
 
-func (Submission) Opcode() byte { return OpcodeSubmission }
+func (*Submission) Opcode() byte { return OpcodeSubmission }
 
-func (s Submission) UnmarshalBinary(data []byte) error {
+func (s *Submission) UnmarshalBinary(data []byte) error {
 	if len(data) < 5 {
 		return errors.New("submission message too short")
 	}
@@ -68,9 +68,9 @@ type PowerupPurchase struct {
 	AffectedPlayer byte
 }
 
-func (PowerupPurchase) Opcode() byte { return OpcodePowerup }
+func (*PowerupPurchase) Opcode() byte { return OpcodePowerup }
 
-func (p PowerupPurchase) UnmarshalBinary(data []byte) error {
+func (p *PowerupPurchase) UnmarshalBinary(data []byte) error {
 	if len(data) < 3 {
 		return errors.New("powerup purchase message too short")
 	}
