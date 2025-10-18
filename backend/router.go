@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func Serve() {
+func serve() {
 	mux := routes()
 	log.Println("listening and serving on 0.0.0.0:8080")
 	http.ListenAndServe("0.0.0.0:8080", mux)
@@ -17,10 +17,10 @@ func routes() *http.ServeMux {
 	fileServer := http.FileServer(http.Dir("../frontend/dist/"))
 	mux.Handle("/", fileServer)
 
-	// hub := NewHub()
-	// go hub.Run()
-	//
-	// mux.HandleFunc("/ws", hub.ServeWs)
+	hub := NewHub()
+	go hub.Run()
+
+	mux.HandleFunc("/ws", hub.ServeWs)
 
 	return mux
 }
