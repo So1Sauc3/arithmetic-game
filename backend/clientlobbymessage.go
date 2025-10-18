@@ -9,11 +9,11 @@ type ClientLobbySubmission struct {
 	NewScore uint
 }
 
-func (ClientLobbySubmission) clientLobbyMessage()
+func (ClientLobbySubmission) clientLobbyMessage() {}
 
 type ClientLobbyStatusEffect struct {
 	ClientID ClientId
 	// status effect
 }
 
-func (ClientLobbyStatusEffect) clientLobbyMessage()
+func (ClientLobbyStatusEffect) clientLobbyMessage() {}
