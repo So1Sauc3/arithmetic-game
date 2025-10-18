@@ -74,6 +74,8 @@ func (c *Client) readPump() {
 				break
 			}
 			if c.expectedResult != int(clientMessage.Answer) {
+				c.log("Wrong answer: expected %d, got %d",
+					c.expectedResult, clientMessage.Answer)
 				break
 			}
 
@@ -104,7 +106,7 @@ func (c *Client) readPump() {
 			if clientMessage.PowerupID >= byte(len(Powerups)) {
 				c.log("received invalid powerup id: %d",
 					clientMessage.PowerupID)
-				break;
+				break
 			}
 
 			c.read <- clientMessage
