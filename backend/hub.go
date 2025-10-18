@@ -88,7 +88,7 @@ func (h *Hub) ServeWs(w http.ResponseWriter, r *http.Request) {
 		name: name,
 		conn: conn,
 
-		lobbyWrite: make(chan ServerMessage),
+		write: make(chan ServerMessage),
 	}
 
 	hubGreetingMessage, _ := HubGreeting{}.MarshalBinary()

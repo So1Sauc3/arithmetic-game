@@ -85,7 +85,7 @@ type NewRegisteredPlayer struct {
 
 func (NewRegisteredPlayer) Opcode() byte { return OpcodeNewRegisteredPlayer }
 
-func (n *NewRegisteredPlayer) MarshalBinary() ([]byte, error) {
+func (n NewRegisteredPlayer) MarshalBinary() ([]byte, error) {
 	pb, err := n.Player.MarshalBinary()
 	if err != nil {
 		return nil, err
@@ -201,14 +201,4 @@ func (Eliminated) Opcode() byte { return OpcodeEliminated }
 
 func (e Eliminated) MarshalBinary() ([]byte, error) {
 	return []byte{OpcodeEliminated, e.Place}, nil
-}
-
-// -------- Start Game --------
-
-type StartGame struct{}
-
-func (StartGame) Opcode() byte { return OpcodeStartGame }
-
-func (StartGame) MarshalBinary() ([]byte, error) {
-	return []byte{OpcodeStartGame}, nil
 }
