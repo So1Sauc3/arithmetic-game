@@ -20,19 +20,22 @@ type Client struct {
 	hub *Hub
 
 	// roomWrite chan PendingMessage
-	lobbyRead  chan ClientMessage
-	lobbyWrite chan ServerMessage
+	read  chan ClientMessage
+	write chan ServerMessage
 
 	closed atomic.Bool
 
 	playing atomic.Bool
 
-	expectedResult atomic.Int32
-	score          atomic.Uint32
-	coins          atomic.Uint32
+	expectedResult int
+	score          uint
+	coins          uint
 
-	difficulty atomic.Uint32
-	answered   atomic.Uint32
+	scoreMult float64
+	coinMult  float64
+
+	difficulty uint
+	answered   uint
 }
 
 func (c *Client) readPump() {
@@ -60,34 +63,67 @@ func (c *Client) readPump() {
 			break
 		}
 
+		c.log("received client message: %d", clientMessage.Opcode())
+
 		switch clientMessage := clientMessage.(type) {
 		case Register:
-			c.lobbyRead <- clientMessage
+			c.read <- clientMessage
 
 		case Submission:
 			if !c.playing.Load() {
 				break
 			}
-			if c.expectedResult.Load() != clientMessage.Answer {
+			if c.expectedResult != int(clientMessage.Answer) {
+				c.log("Wrong answer: expected %d, got %d",
+					c.expectedResult, clientMessage.Answer)
 				break
 			}
 
-			// new question
+			c.answered++
+			if c.answered%5 == 0 {
+				c.answered = 0
+				if c.difficulty < 10 {
+					c.difficulty++
+				}
+			}
+
+			c.score += uint(100 * c.scoreMult)
+			c.coins += uint(10 * c.coinMult)
+
+			c.write <- CorrectSubmission{
+				NewScore: uint32(c.score),
+				NewCoins: uint32(c.coins),
+			}
+
+			// TODO: broadcast
+
+			question, expectedResult := GenerateQuestion(c.difficulty)
+			c.expectedResult = expectedResult
+
+			c.write <- NewQuestion{question}
 
 		case PowerupPurchase:
-			// check balance & reject if necessary
-			c.lobbyRead <- clientMessage
+			if clientMessage.PowerupID >= byte(len(Powerups)) {
+				c.log("received invalid powerup id: %d",
+					clientMessage.PowerupID)
+				break
+			}
+
+			c.read <- clientMessage
 		}
 	}
 }
 
 func (c *Client) writePump() {
-	for msg := range c.lobbyWrite {
+	for msg := range c.write {
 		binaryMsg, err := msg.MarshalBinary()
 		if err != nil {
 			c.log("error marshaing binary: %+v", err)
 			continue
 		}
+
+		c.log("sending message: %d", msg.Opcode())
+
 		err = c.conn.WriteMessage(websocket.BinaryMessage, binaryMsg)
 
 		if err != nil {
