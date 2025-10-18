@@ -57,6 +57,10 @@ func (c *Client) readPump() {
 			break
 		}
 
+		if c.closed.Load() {
+			continue
+		}
+
 		clientMessage, err := ParseClientMessage(message)
 
 		if err != nil {

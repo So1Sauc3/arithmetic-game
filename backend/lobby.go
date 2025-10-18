@@ -107,6 +107,8 @@ startGameLoop:
 		}
 	}
 
+	go l.eliminationHandler()
+
 	for {
 		select {
 		case msg := <-l.lobbyRead:
@@ -183,8 +185,64 @@ func (l *Lobby) broadcast(msg ServerMessage) {
 	}
 }
 
-func randInt(min, max int) int {
-	return rand.IntN(max-min+1) + min
+func (l *Lobby) eliminationHandler() {
+	eliminationTimer := time.NewTimer(30 * time.Second)
+
+	for range eliminationTimer.C {
+		if l.activeClientCount.Load() == 0 {
+			return
+		}
+
+		l.log("eliminating")
+
+		const inf uint = ^uint(0)
+		var c1, c2, c3 *Client
+		min1, min2, min3 := inf, inf, inf
+
+		for _, c := range l.clients {
+			if c.closed.Load() {
+				continue
+			}
+
+			s := c.score
+			switch {
+			case s < min1:
+				c1, c2, c3 = c, c1, c2
+				min1, min2, min3 = s, min1, min2
+			case s < min2:
+				c2, c3 = c, c2
+				min2, min3 = s, min2
+			case s < min3:
+				c3 = c
+				min3 = s
+			}
+		}
+
+		if c1 != nil {
+			c1.write <- Eliminated{byte(l.activeClientCount.Load())}
+			l.activeClientCount.Add(-1)
+			c1.closed.Store(true)
+			l.broadcast(OpponentEliminated{byte(c1.id)})
+		}
+
+		if c2 != nil {
+			c2.write <- Eliminated{byte(l.activeClientCount.Load())}
+			l.activeClientCount.Add(-1)
+			c2.closed.Store(true)
+			l.broadcast(OpponentEliminated{byte(c2.id)})
+		}
+
+		if c3 != nil {
+			c3.write <- Eliminated{byte(l.activeClientCount.Load())}
+			l.activeClientCount.Add(-1)
+			c3.closed.Store(true)
+			l.broadcast(OpponentEliminated{byte(c3.id)})
+		}
+
+		if l.activeClientCount.Load() == 0 {
+			return
+		}
+	}
 }
 
 // GenerateQuestion returns (question string, expectedResult)
@@ -256,4 +314,8 @@ func GenerateQuestion(difficulty uint) (string, int) {
 
 func (l *Lobby) log(format string, v ...any) {
 	log.Printf("lobby %d: %s", l.id, fmt.Sprintf(format, v...))
+}
+
+func randInt(min, max int) int {
+	return rand.IntN(max-min+1) + min
 }
