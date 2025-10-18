@@ -54,7 +54,7 @@ func (l *Lobby) run() {
 	l.log("running")
 	l.open = true
 
-	startGameTimer := time.NewTimer(time.Minute)
+	startGameTimer := time.NewTimer(10 * time.Second)
 
 	clientId := 0
 
@@ -75,6 +75,7 @@ startGameLoop:
 	l.log("wait over, starting game")
 
 	for _, client := range l.clients {
+		client.difficulty = 1
 		client.playing.Store(true)
 
 		question, expectedResult := GenerateQuestion(client.difficulty)
