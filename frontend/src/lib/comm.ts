@@ -1,10 +1,28 @@
+export const Powerup = {
+    CoinMultiplier: 0,
+    ScoreMultiplier: 1,
+    SkipQuestion: 2,
+    EasyMode: 3,
+    DoubleTap: 4,
+    CoinLeak: 5,
+    HardMode: 6,
+} as const;
 
+type PowerupId = typeof Powerup[keyof typeof Powerup]
+
+export const StatusEffect = {
+    DoubleTap: 0,
+    CoinLeak: 1,
+    HardMode: 2,
+} as const;
+
+type StatusEffectId = typeof StatusEffect[keyof typeof StatusEffect]
 
 export const ClientOp = {
-    Register: 0 as const,
-    Submit: 1 as const,
-    Purchase: 2 as const,
-}
+    Register: 0,
+    Submit: 1,
+    Purchase: 2,
+} as const
 
 export type RegisterMessage = {
     opcode: typeof ClientOp.Register;
@@ -18,31 +36,31 @@ export type SubmitMessage = {
 
 export type PurchaseMessage = {
     opcode: typeof ClientOp.Purchase;
-    powerup: number
+    powerup: PowerupId
     targetId: number
 }
 
 export type ClientMessage = RegisterMessage | SubmitMessage | PurchaseMessage;
 
 export const ServerOp = {
-    HubHello: 0 as const,
-    LobbyHello: 1 as const,
-    NewPlayer: 2 as const,
-    CorrectSubmission: 3 as const,
-    NewQuestion: 4 as const,
-    PurchaseConfirmed: 5 as const,
-    StatusChanged: 6 as const,
-    OpponentStatusChanged: 7 as const,
-    Eliminated: 8 as const,
-    OpponentEliminated: 9 as const,
-}
+    HubHello: 0,
+    LobbyHello: 1,
+    NewPlayer: 2,
+    CorrectSubmission: 3,
+    NewQuestion: 4,
+    PurchaseConfirmed: 5,
+    StatusChanged: 6,
+    OpponentStatusChanged: 7,
+    Eliminated: 8,
+    OpponentEliminated: 9,
+    OpponentScoreChanged: 10,
+    MultipliersChanged: 11,
+} as const
 
 export type Player = {
     id: number
     name: string
 }
-
-export type Status = number;
 
 export type HubHello = {
     opcode: typeof ServerOp.HubHello;
@@ -76,13 +94,13 @@ export type PurchaseConfirmed = {
 
 export type StatusChanged = {
     opcode: typeof ServerOp.StatusChanged
-    effects: Status[]
+    effects: StatusEffectId[]
 }
 
 export type OpponentStatusChanged = {
     opcode: typeof ServerOp.OpponentStatusChanged
     playerId: number
-    effects: Status[]
+    effects: StatusEffectId[]
 }
 
 export type Eliminated = {
@@ -95,11 +113,24 @@ export type OpponentEliminated = {
     playerId: number
 }
 
+export type OpponentScoreChanged = {
+    opcode: typeof ServerOp.OpponentScoreChanged
+    playerId: number
+    score: number
+}
+
+export type MultipliersChanged = {
+    opcode: typeof ServerOp.MultipliersChanged
+    scoreMultiplier: number
+    coinMultiplier: number
+}
+
 export type ServerMessage = HubHello | LobbyHello
     | NewPlayer | CorrectSubmission
     | NewQuestion | PurchaseConfirmed
     | StatusChanged | OpponentStatusChanged
-    | Eliminated | OpponentEliminated;
+    | Eliminated | OpponentEliminated
+    | OpponentScoreChanged | MultipliersChanged;
 
 const textDecoder = new TextDecoder('utf-8');
 const textEncoder = new TextEncoder();
@@ -154,13 +185,13 @@ function parsePlayer(view: DataView, offset: number): [Player, number] {
 }
 
 // Helper: parses status effect IDs
-function parseStatusEffects(view: DataView, count: number, offset: number): [Status[], number] {
+function parseStatusEffects(view: DataView, count: number, offset: number): [StatusEffectId[], number] {
     const arr = [];
     for (let i = 0; i < count; i++) {
         arr.push(view.getUint16(offset, false)); // big-endian
         offset += 2;
     }
-    return [arr, offset];
+    return [arr as StatusEffectId[], offset];
 }
 
 function parseServerMessage(buffer: ArrayBuffer): ServerMessage {
@@ -246,9 +277,27 @@ function parseServerMessage(buffer: ArrayBuffer): ServerMessage {
             }
 
         case 9: // Opponent Eliminated
-            // No content
-            const playerId = view.getUint8(offset++);
-            return { opcode, playerId } ;
+            {
+                const playerId = view.getUint8(offset++);
+                return { opcode, playerId } ;
+            }
+
+        case 10: // Opponent Score Changed
+            {
+                const playerId = view.getUint8(offset++);
+                const score = view.getUint32(offset, false)
+                offset += 4;
+                return { opcode, playerId, score } ;
+            }
+
+        case 11: // Multipliers Changed
+            {
+                const scoreMultiplier = view.getFloat32(offset, false)
+                offset += 4;
+                const coinMultiplier = view.getFloat32(offset, false)
+                offset += 4;
+                return { opcode, scoreMultiplier, coinMultiplier } ;
+            }
 
         default:
             throw new Error('Unknown opcode: ' + opcode);
