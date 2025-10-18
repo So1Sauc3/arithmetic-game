@@ -1,10 +1,15 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 
 function Instructions() {
   return (
-    <div style={{padding:20, backgroundColor: '#f0f0f0'}}>
-      <h2>Instructions</h2>
+    <div className="p-5 bg-gray-100 border-2 border-blue-500 rounded-lg my-2">
+      <h2 className="text-xl font-bold text-blue-600 mb-4">Instructions</h2>
+      <div className="space-y-2 text-sm">
+        <p className="font-semibold text-gray-800">⏱️ This is a 5 MINUTE multiplayer math game</p>
+        <p className="text-gray-700">👥 There are up to 30 players in the Lobby</p>
+        <p className="text-gray-700">📈 Difficulty multiplier 1-10, every 5 questions increase by 1</p>
+      </div>
     </div>
   );
 }
@@ -20,26 +25,24 @@ function NameEntry() {
   }
 
   return (
-    <div style={{padding:20, backgroundColor: '#f0f0f0'}}>
+    <div className="p-5 bg-gray-100 border-2 border-green-500 rounded-lg my-2">
       <input 
         type="text" 
         placeholder="Enter your name" 
         value={name}
         onChange={(e) => setName(e.target.value)}
+        className="mr-2 px-3 py-1 border border-gray-300 rounded"
       />
       <button 
-        style={{
-          backgroundColor: name.trim() ? '#007bff' : '#ccc',
-          color: 'white', 
-          padding: '8px 16px', 
-          border: 'none', 
-          borderRadius: '4px',
-          cursor: name.trim() ? 'pointer' : 'not-allowed'
-        }}
+        className={`px-4 py-2 rounded text-white ${
+          name.trim() 
+            ? 'bg-blue-500 hover:bg-blue-600 cursor-pointer' 
+            : 'bg-gray-400 cursor-not-allowed'
+        }`}
         onClick={handleLogin}
         disabled={!name.trim()}
       >
-        Login
+        Enter Lobby
       </button>
     </div>
     
@@ -48,9 +51,16 @@ function NameEntry() {
 
 export default function Login() {
   return (
-    <div style={{padding:20}}>
-      <h1>Login</h1>
-        <NameEntry />
+    <div className="min-h-screen flex flex-col items-center justify-center p-5">
+      <h1 className="text-2xl font-bold mb-8">Login</h1>
+      <div className="flex gap-4 max-w-4xl w-full">
+        <div className="flex-1">
+          <NameEntry />
+        </div>
+        <div className="flex-1">
+          <Instructions />
+        </div>
+      </div>
     </div>
   )
 }
