@@ -101,6 +101,11 @@ func (c *Client) readPump() {
 			c.write <- NewQuestion{question}
 
 		case PowerupPurchase:
+			if clientMessage.PowerupID >= byte(len(Powerups)) {
+				c.log("received invalid powerup id: %d",
+					clientMessage.PowerupID)
+				break;
+			}
 
 			c.read <- clientMessage
 		}
@@ -114,6 +119,9 @@ func (c *Client) writePump() {
 			c.log("error marshaing binary: %+v", err)
 			continue
 		}
+
+		c.log("sending message: %d", msg.Opcode())
+
 		err = c.conn.WriteMessage(websocket.BinaryMessage, binaryMsg)
 
 		if err != nil {
