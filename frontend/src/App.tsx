@@ -4,6 +4,8 @@ import * as comm from './lib/comm.ts'
 
 import Login from './pages/Login'
 import Game from './pages/Game'
+import Lobby from './pages/Lobby'
+
 import ParticlesBackground from './components/ParticlesBackground'
 
 export default function App() {
@@ -22,6 +24,7 @@ export default function App() {
         <main>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/lobby" element={<Lobby />} />
             <Route path="/game" element={<Game />} />
             <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>
