@@ -113,7 +113,8 @@ func (c CorrectSubmission) MarshalBinary() ([]byte, error) {
 // -------- New Question --------
 
 type NewQuestion struct {
-	Question string
+	Difficulty byte
+	Question   string
 }
 
 func (NewQuestion) Opcode() byte { return OpcodeNewQuestion }
@@ -123,10 +124,11 @@ func (nq NewQuestion) MarshalBinary() ([]byte, error) {
 	if qLen > 65535 {
 		return nil, errors.New("question too long")
 	}
-	data := make([]byte, 3+qLen)
+	data := make([]byte, 4+qLen)
 	data[0] = OpcodeNewQuestion
-	binary.BigEndian.PutUint16(data[1:], uint16(qLen))
-	copy(data[3:], nq.Question)
+	data[1] = nq.Difficulty
+	binary.BigEndian.PutUint16(data[2:], uint16(qLen))
+	copy(data[4:], nq.Question)
 	return data, nil
 }
 
