@@ -12,8 +12,9 @@ import (
 type ClientId = int
 
 type Lobby struct {
-	id       int
-	register chan *Client
+	id         int
+	register   chan *Client
+	unregister chan *Client
 
 	lobbyRead chan ClientLobbyMessage
 
@@ -22,7 +23,7 @@ type Lobby struct {
 	// contains all clients even those disconnected
 	clients map[ClientId]*Client
 
-	activeClientCount atomic.Uint32
+	activeClientCount atomic.Int32
 
 	hub *Hub
 
@@ -33,14 +34,17 @@ type Lobby struct {
 
 func newLobby(id int, hub *Hub) *Lobby {
 	l := &Lobby{
-		id:       id,
-		register: make(chan *Client),
+		id:         id,
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
 
 		lobbyRead: make(chan ClientLobbyMessage),
 
 		clients: make(map[ClientId]*Client),
 
 		hub: hub,
+
+		done: make(chan struct{}),
 	}
 
 	return l
@@ -52,13 +56,15 @@ func (l *Lobby) clientCount() int {
 
 func (l *Lobby) run() {
 	l.log("running")
+
 	l.open = true
 
-	startGameTimer := time.NewTimer(1 * time.Second)
+	startGameTimer := time.NewTimer(time.Minute)
 
 	clientId := 0
 
 	l.log("lobby started, waiting for players")
+
 startGameLoop:
 	for {
 		select {
@@ -67,10 +73,20 @@ startGameLoop:
 			clientId++
 			l.registerClient(client)
 
+		case client := <-l.unregister:
+			l.unregisterClient(client)
+
 		case <-startGameTimer.C:
 			break startGameLoop
+
+		case <-l.done:
+			l.log("closing")
+			l.hub.unregisterLobby(l)
+			return
 		}
 	}
+
+	startGameTimer.Stop()
 
 	l.log("wait over, starting game")
 
@@ -91,13 +107,27 @@ startGameLoop:
 		}
 	}
 
-	for msg := range l.lobbyRead {
-		switch msg := msg.(type) {
-		case ClientLobbySubmission:
-			l.broadcast(OpponentScoreChanged{
-				PlayerID: byte(msg.ClientID),
-				NewScore: uint32(msg.NewScore),
-			})
+	for {
+		select {
+		case msg := <-l.lobbyRead:
+			switch msg := msg.(type) {
+
+			case ClientLobbySubmission:
+				l.broadcast(OpponentScoreChanged{
+					PlayerID: byte(msg.ClientID),
+					NewScore: uint32(msg.NewScore),
+				})
+
+			}
+
+		case c := <-l.unregister:
+			l.unregisterClient(c)
+
+		case <-l.done:
+			l.log("closing")
+			l.hub.unregisterLobby(l)
+			return
+
 		}
 	}
 }
@@ -111,13 +141,17 @@ func (l *Lobby) registerClient(c *Client) bool {
 	l.broadcast(NewRegisteredPlayer{
 		Player{ID: byte(c.id), Name: c.name}})
 
+	c.unregister = l.unregister
 	c.read = l.lobbyRead
+
 	go c.readPump()
 
 	players := []Player{}
 	for _, client := range l.clients {
-		players = append(players,
-			Player{ID: byte(client.id), Name: client.name})
+		if !client.closed.Load() {
+			players = append(players,
+				Player{ID: byte(client.id), Name: client.name})
+		}
 	}
 
 	c.write <- LobbyGreeting{Players: players}
@@ -128,6 +162,17 @@ func (l *Lobby) registerClient(c *Client) bool {
 	full := l.activeClientCount.Load() == ClientsPerLobby
 
 	return full
+}
+
+func (l *Lobby) unregisterClient(c *Client) {
+	l.activeClientCount.Add(-1)
+
+	l.broadcast(OpponentEliminated{byte(c.id)})
+
+	if l.activeClientCount.Load() == 0 {
+		l.log("all clients left")
+		close(l.done)
+	}
 }
 
 func (l *Lobby) broadcast(msg ServerMessage) {
