@@ -20,7 +20,7 @@ type Client struct {
 	hub *Hub
 
 	// roomWrite chan PendingMessage
-	read  chan ClientMessage
+	read  chan ClientLobbyMessage
 	write chan ServerMessage
 
 	closed atomic.Bool
@@ -67,8 +67,6 @@ func (c *Client) readPump() {
 			clientMessage.Opcode(), clientMessage)
 
 		switch clientMessage := clientMessage.(type) {
-		case *Register:
-			c.read <- clientMessage
 
 		case *Submission:
 			if !c.playing.Load() {
@@ -95,7 +93,7 @@ func (c *Client) readPump() {
 				NewCoins: uint32(c.coins),
 			}
 
-			// TODO: broadcast
+			c.read <- ClientLobbySubmission{c.id}
 
 			question, expectedResult := GenerateQuestion(c.difficulty)
 			c.expectedResult = expectedResult
@@ -112,7 +110,7 @@ func (c *Client) readPump() {
 				break
 			}
 
-			c.read <- clientMessage
+			// c.read <- clientMessage
 		}
 	}
 }
