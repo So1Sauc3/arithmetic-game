@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function GameInfo() {
     const [currentTip, setCurrentTip] = useState(0);
@@ -107,9 +108,23 @@ function PlayerList() {
 }
 
 export default function Lobby() {
+  const navigate = useNavigate();
+
+  const handleLeaveLobby = () => {
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-5">
-      <h1 className="text-2xl font-bold mb-8">Lobby</h1>
+      <div className="flex justify-between items-center w-full max-w-4xl mb-8">
+        <h1 className="text-2xl font-bold">Lobby</h1>
+        <button 
+          onClick={handleLeaveLobby}
+          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
+        >
+          Leave Lobby
+        </button>
+      </div>
       <div className="flex gap-4 max-w-4xl w-full">
         <div className="flex-1">
           <PlayerList />
