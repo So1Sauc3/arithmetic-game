@@ -1,13 +1,8 @@
-import { Link } from 'react-router-dom'
-
+import ParticlesBackground from '@/components/ui/ParticlesBackground';
 export default function Game() {
   return (
-    <div style={{padding:20}}>
-      <h1>Game</h1>
-      <p>This is a blank game page to work on.</p>
-      <p>
-        <Link to="/login">Go to Login</Link>
-      </p>
+    <div className="relative w-full h-screen overflow-hidden bg-black">
+      <ParticlesBackground/>
     </div>
   )
 }

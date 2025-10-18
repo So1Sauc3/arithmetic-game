@@ -1,7 +1,5 @@
 #root {
-  max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
@@ -39,4 +37,28 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* App layering for full-screen particles background */
+.app-root {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden; /* prevent particles from creating scrollbars */
+}
+
+.app-content {
+  position: relative;
+  z-index: 2; /* ensure content is above the particles */
+  min-height: 100vh;
+}
+
+/* tsparticles renders a canvas inside the container with id #tsparticles. Make it cover the viewport and sit under content */
+#tsparticles,
+#tsparticles > canvas {
+  position: fixed !important;
+  inset: 0; /* top/right/bottom/left: 0 */
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1;
+  pointer-events: none; /* allow clicks through the particles */
 }
