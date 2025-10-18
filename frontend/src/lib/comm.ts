@@ -1,37 +1,41 @@
 
 
-export const RegisterOp = 0 as const;
-export const SubmitOp = 1 as const;
-export const PurchaseOp = 2 as const;
+export const ClientOp = {
+    Register: 0 as const,
+    Submit: 1 as const,
+    Purchase: 2 as const,
+}
 
 export type RegisterMessage = {
-    opcode: typeof RegisterOp;
+    opcode: typeof ClientOp.Register;
     name: string
 }
 
 export type SubmitMessage = {
-    opcode: typeof SubmitOp;
+    opcode: typeof ClientOp.Submit;
     answer: number
 }
 
 export type PurchaseMessage = {
-    opcode: typeof PurchaseOp;
+    opcode: typeof ClientOp.Purchase;
     powerup: number
     targetId: number
 }
 
 export type ClientMessage = RegisterMessage | SubmitMessage | PurchaseMessage;
 
-export const HubHelloOp = 0 as const;
-export const LobbyHelloOp = 1 as const;
-export const NewPlayerOp = 2 as const;
-export const CorrectSubmissionOp = 3 as const;
-export const NewQuestionOp = 4 as const;
-export const PurchaseConfirmedOp = 5 as const;
-export const StatusChangedOp = 6 as const;
-export const OpponentStatusChangedOp = 7 as const;
-export const EliminatedOp = 8 as const;
-export const StartGameOp = 9 as const;
+export const ServerOp = {
+    HubHello: 0 as const,
+    LobbyHello: 1 as const,
+    NewPlayer: 2 as const,
+    CorrectSubmission: 3 as const,
+    NewQuestion: 4 as const,
+    PurchaseConfirmed: 5 as const,
+    StatusChanged: 6 as const,
+    OpponentStatusChanged: 7 as const,
+    Eliminated: 8 as const,
+    OpponentEliminated: 9 as const,
+}
 
 export type Player = {
     id: number
@@ -41,55 +45,61 @@ export type Player = {
 export type Status = number;
 
 export type HubHello = {
-    opcode: typeof HubHelloOp;
+    opcode: typeof ServerOp.HubHello;
 }
 
 export type LobbyHello = {
-    opcode: typeof LobbyHelloOp;
+    opcode: typeof ServerOp.LobbyHello;
     players: Player[]
 };
 
 export type NewPlayer = {
-    opcode: typeof NewPlayerOp;
+    opcode: typeof ServerOp.NewPlayer;
 } & Player;
 
 export type CorrectSubmission = {
-    opcode: typeof CorrectSubmissionOp
+    opcode: typeof ServerOp.CorrectSubmission
     score: number
     coins: number
 }
 
 export type NewQuestion = {
-    opcode: typeof NewQuestionOp
+    opcode: typeof ServerOp.NewQuestion
+    difficulty: number
     question: string
 }
 
 export type PurchaseConfirmed = {
-    opcode: typeof PurchaseConfirmedOp
+    opcode: typeof ServerOp.PurchaseConfirmed
     coins: number
 }
 
 export type StatusChanged = {
-    opcode: typeof StatusChangedOp
+    opcode: typeof ServerOp.StatusChanged
     effects: Status[]
 }
 
 export type OpponentStatusChanged = {
-    opcode: typeof OpponentStatusChangedOp
+    opcode: typeof ServerOp.OpponentStatusChanged
     playerId: number
     effects: Status[]
 }
 
 export type Eliminated = {
-    opcode: typeof EliminatedOp
+    opcode: typeof ServerOp.Eliminated
     place: number
 }
 
-export type StartGame = {
-    opcode: typeof StartGameOp
+export type OpponentEliminated = {
+    opcode: typeof ServerOp.OpponentEliminated
+    playerId: number
 }
 
-export type ServerMessage = HubHello | LobbyHello | NewPlayer | CorrectSubmission | NewQuestion | PurchaseConfirmed | StatusChanged | OpponentStatusChanged | Eliminated | StartGame;
+export type ServerMessage = HubHello | LobbyHello
+    | NewPlayer | CorrectSubmission
+    | NewQuestion | PurchaseConfirmed
+    | StatusChanged | OpponentStatusChanged
+    | Eliminated | OpponentEliminated;
 
 const textDecoder = new TextDecoder('utf-8');
 const textEncoder = new TextEncoder();
@@ -194,12 +204,13 @@ function parseServerMessage(buffer: ArrayBuffer): ServerMessage {
 
         case 4: // New Question
             {
+                const difficulty = view.getUint8(offset++);
                 const questionLength = view.getUint16(offset, false); // big-endian
                 offset += 2;
                 const qBytes = new Uint8Array(view.buffer, view.byteOffset + offset, questionLength);
                 const question = textDecoder.decode(qBytes);
                 offset += questionLength;
-                return { question, opcode };
+                return { difficulty, question, opcode };
             }
 
         case 5: // Purchase Confirmed
@@ -234,9 +245,10 @@ function parseServerMessage(buffer: ArrayBuffer): ServerMessage {
                 return { place, opcode };
             }
 
-        case 9: // Start Game
+        case 9: // Opponent Eliminated
             // No content
-            return { opcode } ;
+            const playerId = view.getUint8(offset++);
+            return { opcode, playerId } ;
 
         default:
             throw new Error('Unknown opcode: ' + opcode);
