@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"errors"
+	"math"
 )
 
 // ServerMessage is implemented by all server->client messages.
@@ -24,6 +25,7 @@ const (
 	OpcodeEliminated
 	OpcodeOpponentEliminated
 	OpcodeOpponentScoreChanged
+	OpcodeMultipliersChanged
 )
 
 // -------- Helper Types --------
@@ -232,5 +234,22 @@ func (o OpponentScoreChanged) MarshalBinary() ([]byte, error) {
 	data[0] = OpcodeOpponentScoreChanged
 	data[1] = o.PlayerID
 	binary.BigEndian.PutUint32(data[2:], o.NewScore)
+	return data, nil
+}
+
+// -------- Multipliers Changed --------
+
+type MultipliersChanged struct {
+	ScoreMult float32
+	CoinMult  float32
+}
+
+func (MultipliersChanged) Opcode() byte { return OpcodeMultipliersChanged }
+
+func (m MultipliersChanged) MarshalBinary() ([]byte, error) {
+	data := make([]byte, 1+4+4)
+	data[0] = OpcodeMultipliersChanged // Opcode
+	binary.BigEndian.PutUint32(data[1:], math.Float32bits(m.ScoreMult))
+	binary.BigEndian.PutUint32(data[5:], math.Float32bits(m.CoinMult))
 	return data, nil
 }

@@ -6,7 +6,7 @@ type ClientLobbyMessage interface {
 
 type ClientLobbySubmission struct {
 	ClientID ClientId
-	NewScore int
+	NewScore uint
 }
 
 func (ClientLobbySubmission) clientLobbyMessage()

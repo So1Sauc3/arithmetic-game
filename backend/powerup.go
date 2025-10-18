@@ -1,14 +1,14 @@
 package main
 
 const (
-	CoinMultPowerup uint16 = iota
+	CoinMultPowerup byte = iota
 	ScoreMultPowerup
 	SkipQuestionPowerup
 	EasyModePowerup
 )
 
 type Powerup struct {
-	cost int
+	cost uint
 }
 
 var Powerups = []Powerup{
