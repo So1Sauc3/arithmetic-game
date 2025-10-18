@@ -5,7 +5,7 @@ export const particlesOptions = {
   fullScreen: { enable: false },
   background: {
     color: {
-      value: "#0d47a1",
+      value: "#01051A",
     },
   },
   fpsLimit: 60,

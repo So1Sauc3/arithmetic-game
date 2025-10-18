@@ -4,7 +4,7 @@ import * as comm from './lib/comm.ts'
 
 import Login from './pages/Login'
 import Game from './pages/Game'
-import ParticlesBackground from './components/ui/ParticlesBackground'
+import ParticlesBackground from './components/ParticlesBackground'
 
 export default function App() {
   (window as any).sockets = comm;
