@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 )
 
 func serve() {
@@ -14,8 +15,14 @@ func serve() {
 func routes() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	fileServer := http.FileServer(http.Dir("../frontend/dist/"))
-	mux.Handle("/", fileServer)
+	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := "../frontend/dist" + r.URL.Path
+		if _, err := os.Stat(path); os.IsNotExist(err) || r.URL.Path == "/" {
+			http.ServeFile(w, r, "../frontend/dist/index.html")
+			return
+		}
+		http.FileServer(http.Dir("../frontend/dist")).ServeHTTP(w, r)
+	}))
 
 	hub := NewHub()
 	go hub.Run()
@@ -24,4 +31,3 @@ func routes() *http.ServeMux {
 
 	return mux
 }
-

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"errors"
+	"math"
 )
 
 // ServerMessage is implemented by all server->client messages.
@@ -13,16 +14,18 @@ type ServerMessage interface {
 
 // Opcodes
 const (
-	OpcodeHubGreeting              byte = 0
-	OpcodeLobbyGreeting            byte = 1
-	OpcodeNewRegisteredPlayer      byte = 2
-	OpcodeCorrectSubmission        byte = 3
-	OpcodeNewQuestion              byte = 4
-	OpcodePurchaseConfirmed        byte = 5
-	OpcodeStatusChanged            byte = 6
-	OpcodeOtherPlayerStatusChanged byte = 7
-	OpcodeEliminated               byte = 8
-	OpcodeStartGame                byte = 9
+	OpcodeHubGreeting byte = iota
+	OpcodeLobbyGreeting
+	OpcodeNewRegisteredPlayer
+	OpcodeCorrectSubmission
+	OpcodeNewQuestion
+	OpcodePurchaseConfirmed
+	OpcodeStatusChanged
+	OpcodeOtherPlayerStatusChanged
+	OpcodeEliminated
+	OpcodeOpponentEliminated
+	OpcodeOpponentScoreChanged
+	OpcodeMultipliersChanged
 )
 
 // -------- Helper Types --------
@@ -203,4 +206,50 @@ func (Eliminated) Opcode() byte { return OpcodeEliminated }
 
 func (e Eliminated) MarshalBinary() ([]byte, error) {
 	return []byte{OpcodeEliminated, e.Place}, nil
+}
+
+// -------- Opponent Eliminated --------
+
+type OpponentEliminated struct {
+	PlayerID byte
+}
+
+func (OpponentEliminated) Opcode() byte { return OpcodeOpponentEliminated }
+
+func (e OpponentEliminated) MarshalBinary() ([]byte, error) {
+	return []byte{OpcodeOpponentEliminated, e.PlayerID}, nil
+}
+
+// -------- Opponent Score Changed --------
+
+type OpponentScoreChanged struct {
+	PlayerID byte
+	NewScore uint32
+}
+
+func (OpponentScoreChanged) Opcode() byte { return OpcodeOpponentScoreChanged }
+
+func (o OpponentScoreChanged) MarshalBinary() ([]byte, error) {
+	data := make([]byte, 1+1+4)
+	data[0] = OpcodeOpponentScoreChanged
+	data[1] = o.PlayerID
+	binary.BigEndian.PutUint32(data[2:], o.NewScore)
+	return data, nil
+}
+
+// -------- Multipliers Changed --------
+
+type MultipliersChanged struct {
+	ScoreMult float32
+	CoinMult  float32
+}
+
+func (MultipliersChanged) Opcode() byte { return OpcodeMultipliersChanged }
+
+func (m MultipliersChanged) MarshalBinary() ([]byte, error) {
+	data := make([]byte, 1+4+4)
+	data[0] = OpcodeMultipliersChanged // Opcode
+	binary.BigEndian.PutUint32(data[1:], math.Float32bits(m.ScoreMult))
+	binary.BigEndian.PutUint32(data[5:], math.Float32bits(m.CoinMult))
+	return data, nil
 }
