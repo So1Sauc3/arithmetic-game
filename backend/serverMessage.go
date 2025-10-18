@@ -22,6 +22,7 @@ const (
 	OpcodeStatusChanged            byte = 6
 	OpcodeOtherPlayerStatusChanged byte = 7
 	OpcodeEliminated               byte = 8
+	OpcodeStartGame                byte = 9
 )
 
 // -------- Helper Types --------
@@ -31,7 +32,7 @@ type Player struct {
 	Name string
 }
 
-func (p *Player) MarshalBinary() ([]byte, error) {
+func (p Player) MarshalBinary() ([]byte, error) {
 	nameLen := len(p.Name)
 	if nameLen > 255 {
 		return nil, errors.New("player name too long")
@@ -61,7 +62,7 @@ type LobbyGreeting struct {
 
 func (LobbyGreeting) Opcode() byte { return OpcodeLobbyGreeting }
 
-func (lg *LobbyGreeting) MarshalBinary() ([]byte, error) {
+func (lg LobbyGreeting) MarshalBinary() ([]byte, error) {
 	if len(lg.Players) > 255 {
 		return nil, errors.New("too many players")
 	}
@@ -101,7 +102,7 @@ type CorrectSubmission struct {
 
 func (CorrectSubmission) Opcode() byte { return OpcodeCorrectSubmission }
 
-func (c *CorrectSubmission) MarshalBinary() ([]byte, error) {
+func (c CorrectSubmission) MarshalBinary() ([]byte, error) {
 	data := make([]byte, 1+8)
 	data[0] = OpcodeCorrectSubmission
 	binary.BigEndian.PutUint32(data[1:], c.NewScore)
@@ -117,7 +118,7 @@ type NewQuestion struct {
 
 func (NewQuestion) Opcode() byte { return OpcodeNewQuestion }
 
-func (nq *NewQuestion) MarshalBinary() ([]byte, error) {
+func (nq NewQuestion) MarshalBinary() ([]byte, error) {
 	qLen := len(nq.Question)
 	if qLen > 65535 {
 		return nil, errors.New("question too long")
@@ -137,7 +138,7 @@ type PurchaseConfirmed struct {
 
 func (PurchaseConfirmed) Opcode() byte { return OpcodePurchaseConfirmed }
 
-func (p *PurchaseConfirmed) MarshalBinary() ([]byte, error) {
+func (p PurchaseConfirmed) MarshalBinary() ([]byte, error) {
 	data := make([]byte, 1+4)
 	data[0] = OpcodePurchaseConfirmed
 	binary.BigEndian.PutUint32(data[1:], p.NewCoins)
@@ -152,7 +153,7 @@ type StatusChanged struct {
 
 func (StatusChanged) Opcode() byte { return OpcodeStatusChanged }
 
-func (s *StatusChanged) MarshalBinary() ([]byte, error) {
+func (s StatusChanged) MarshalBinary() ([]byte, error) {
 	count := len(s.StatusEffectIDs)
 	if count > 65535 {
 		return nil, errors.New("too many status effects")
@@ -175,7 +176,7 @@ type OtherPlayerStatusChanged struct {
 
 func (OtherPlayerStatusChanged) Opcode() byte { return OpcodeOtherPlayerStatusChanged }
 
-func (o *OtherPlayerStatusChanged) MarshalBinary() ([]byte, error) {
+func (o OtherPlayerStatusChanged) MarshalBinary() ([]byte, error) {
 	count := len(o.StatusEffectIDs)
 	if count > 65535 {
 		return nil, errors.New("too many status effects")
@@ -198,6 +199,16 @@ type Eliminated struct {
 
 func (Eliminated) Opcode() byte { return OpcodeEliminated }
 
-func (e *Eliminated) MarshalBinary() ([]byte, error) {
+func (e Eliminated) MarshalBinary() ([]byte, error) {
 	return []byte{OpcodeEliminated, e.Place}, nil
+}
+
+// -------- Start Game --------
+
+type StartGame struct{}
+
+func (StartGame) Opcode() byte { return OpcodeStartGame }
+
+func (StartGame) MarshalBinary() ([]byte, error) {
+	return []byte{OpcodeStartGame}, nil
 }

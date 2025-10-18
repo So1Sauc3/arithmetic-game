@@ -1,7 +1,11 @@
 package main
 
 import (
-	"sync"
+	"errors"
+	"fmt"
+	"log"
+	"net"
+	"sync/atomic"
 
 	"github.com/gorilla/websocket"
 )
@@ -16,73 +20,92 @@ type Client struct {
 	hub *Hub
 
 	// roomWrite chan PendingMessage
-	roomRead  chan ClientMessage
+	lobbyRead  chan ClientMessage
+	lobbyWrite chan ServerMessage
 
-	// room things
-	// done   bool
-	// closed bool
+	closed atomic.Bool
 
-	closedMu sync.Mutex
+	playing atomic.Bool
+
+	expectedResult atomic.Int32
+	score          atomic.Uint32
+	coins          atomic.Uint32
+
+	difficulty atomic.Uint32
+	answered   atomic.Uint32
 }
 
-// func (c *Client) readPump() {
-// 	defer func() {
-// 		if c.roomRead != nil {
-// 			c.roomRead <- m.ClientQuitMessage{PlayerId: c.id}
-// 		}
-// 		c.close()
-// 	}()
-//
-// 	for {
-// 		var v json.RawMessage
-//
-// 		err := c.conn.ReadJSON(&v)
-// 		if err != nil {
-// 			c.connClosed = true
-// 			if websocket.IsCloseError(err,
-// 				websocket.CloseNormalClosure,
-// 				websocket.CloseGoingAway,
-// 				websocket.CloseAbnormalClosure,
-// 			) || errors.Is(err, net.ErrClosed) {
-// 				c.log("Tried to read, websocket closed")
-// 				break
-// 			}
-// 			c.log("error reading connection json: %+v", err.Error())
-// 			break
-// 		}
-//
-// 		c.log("message received: %s", v)
-//
-// 		var w m.ClientMessageWrapper
-//
-// 		err = json.Unmarshal(v, &w)
-// 		if err != nil {
-// 			c.log("Error unmarshaling data 1: %v", err)
-// 			continue
-// 		}
-//
-// 		var cm m.ClientMessage
-//
-// 		switch w.Type {
-// 		case m.ClientMessageTypeClientQuit:
-// 			qm := m.ClientQuitMessage{}
-// 			err = json.Unmarshal(w.Data, &qm)
-// 			cm = qm
-// 		case m.ClientMessageTypeSubmit:
-// 			sm := m.SubmitMessage{}
-// 			err = json.Unmarshal(w.Data, &sm)
-// 			cm = sm
-// 		case m.ClientMessageTypeSkipLobby:
-// 			cm = m.SkipLobbyMessage{}
-// 		case m.ClientMessageTypeSkipQuestion:
-// 			cm = m.SkipQuestionMessage{}
-// 		}
-//
-// 		if err != nil {
-// 			c.log("Error unmarshaling data 2: %v", err)
-// 			continue
-// 		}
-//
-// 		c.roomRead <- cm
-// 	}
-// }
+func (c *Client) readPump() {
+	for {
+		_, message, err := c.conn.ReadMessage()
+
+		if err != nil {
+			c.connClosed = true
+			if websocket.IsCloseError(err,
+				websocket.CloseNormalClosure,
+				websocket.CloseGoingAway,
+				websocket.CloseAbnormalClosure,
+			) || errors.Is(err, net.ErrClosed) {
+				c.log("Tried to read, websocket closed")
+				break
+			}
+			c.log("error reading message from websocket: %+v", err.Error())
+			break
+		}
+
+		clientMessage, err := ParseClientMessage(message)
+
+		if err != nil {
+			c.log("error parsing client message: %+v", err)
+			break
+		}
+
+		switch clientMessage := clientMessage.(type) {
+		case Register:
+			c.lobbyRead <- clientMessage
+
+		case Submission:
+			if !c.playing.Load() {
+				break
+			}
+			if c.expectedResult.Load() != clientMessage.Answer {
+				break
+			}
+
+			// new question
+
+		case PowerupPurchase:
+			// check balance & reject if necessary
+			c.lobbyRead <- clientMessage
+		}
+	}
+}
+
+func (c *Client) writePump() {
+	for msg := range c.lobbyWrite {
+		binaryMsg, err := msg.MarshalBinary()
+		if err != nil {
+			c.log("error marshaing binary: %+v", err)
+			continue
+		}
+		err = c.conn.WriteMessage(websocket.BinaryMessage, binaryMsg)
+
+		if err != nil {
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+				c.log("Tried to write, websocket closed")
+				break
+			}
+			c.log("error writing server message to json %v", err)
+			return
+		}
+	}
+
+	if !c.connClosed {
+		c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+	}
+	c.log("writePump closed")
+}
+
+func (c *Client) log(format string, v ...any) {
+	log.Printf("client %d: %s", c.id, fmt.Sprintf(format, v...))
+}
