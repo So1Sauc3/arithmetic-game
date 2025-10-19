@@ -94,7 +94,6 @@ startGameLoop:
 	}
 
 	l.open = false
-	startGameTimer.Stop()
 
 	l.log("wait over, starting game")
 
@@ -200,10 +199,11 @@ func (l *Lobby) broadcast(msg ServerMessage) {
 }
 
 func (l *Lobby) eliminationHandler() {
-	eliminationTimer := time.NewTimer(30 * time.Second)
+	eliminationTimer := time.NewTicker(30 * time.Second)
 
 	for range eliminationTimer.C {
 		if l.activeClientCount.Load() == 0 {
+			eliminationTimer.Stop()
 			l.log("stopping elimination handler")
 			if !l.closed.Load() {
 				close(l.done)
@@ -257,6 +257,8 @@ func (l *Lobby) eliminationHandler() {
 			c3.closed.Store(true)
 			l.broadcast(OpponentEliminated{byte(c3.id)})
 		}
+
+		l.log("active clients after eliminating: %d", l.activeClientCount.Load())
 	}
 }
 

@@ -44,7 +44,6 @@ export function FloatingClouds() {
       createCloud(index * (screenWidth / NUM_CLOUDS))
     );
     setClouds(initialClouds);
-    console.log('Initial clouds created:', initialClouds);
   }, [screenWidth]);
 
   // Animate clouds
@@ -74,12 +73,9 @@ export function FloatingClouds() {
     return () => cancelAnimationFrame(animationFrame);
   }, []);
 
-  console.log('Rendering clouds:', clouds); // Debug log
-
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
       {clouds.map(cloud => {
-        console.log('Rendering cloud:', cloud); // Debug log
         return (
           <img
             key={cloud.id}
