@@ -15,7 +15,6 @@ export default function App() {
   (window as any).sockets = comm;
 
   const { page } = usePage()
-
   return (
       <div className="app-root">
         {/* ParticlesBackground is rendered once and positioned behind everything */}
