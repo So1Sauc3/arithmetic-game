@@ -163,24 +163,32 @@ export default function Game() {
         // <Plate className="" pathDataTemplate="M 0 0 H width V height H 0 Z">
 
         // </Plate>
-        <div className="w-screen h-screen relative overflow-hidden text-white">
-            <div className="w-[300px] h-screen left-0 top-0 absolute border-[#E8D8A1] border-2">
-                <h3 className="text-lg font-semibold py-5">Scoreboard</h3>
-                <AnimatedList
-                    className="h-full"
-                    items={scoreboardItems}
-                    itemClassName="cursor-pointer"
-                    showGradients={true}
-                    displayScrollbar={true}
-                />
+        <div className="w-screen h-screen relative overflow-hidden text-[#E8D8A1]">
+            <div className="w-[300px] h-full left-0 top-0 absolute bg-[#000A2233]">
+                <Plate className="w-full h-full absolute left-0 right-0 p-2 overflow-y-auto" pathDataTemplate="M 0 0 H width V height H 0 Z">
+                    <div className="w-[300px] h-screen left-0 top-0 absolute">
+                        <h3 className="text-lg font-semibold py-5">Scoreboard</h3>
+                        <AnimatedList
+                            className="h-full"
+                            items={scoreboardItems}
+                            itemClassName="cursor-pointer"
+                            showGradients={true}
+                            displayScrollbar={false}
+                        />
+                    </div>
+                </Plate>
             </div>
+            
 
-            <div className="max-w-[900px] mx-auto flex justify-around text-2xl border p-3 border-[#E8D8A1]">
-                <StatisticsItem name="score" value={score} />
-                <StatisticsItem name="coins" value={coin} />
-                <StatisticsItem name="difficulty" value={difficulty} />
-                <StatisticsItem name="timer" value={timer} />
-            </div>
+            <Plate className="max-w-[calc(100vw-612px)] top-0 mx-auto flex items-center justify-around bg-[#000A2233]" pathDataTemplate="M 0 0 H width V height H 0 Z">
+                <div className="w-full flex justify-around text-2xl p-3">
+                    <StatisticsItem name="score" value={score} />
+                    <StatisticsItem name="coins" value={coin} />
+                    <StatisticsItem name="difficulty" value={difficulty} />
+                    <StatisticsItem name="timer" value={timer} />
+                </div>
+            </Plate>
+
             <div className="max-w-[800px] mx-auto h-full flex flex-col items-center justify-center">
                 <div className="w-full text-center mb-6">
                     <TextType
@@ -191,28 +199,28 @@ export default function Game() {
                         userInput={inputValue}
                         isInputActive={isInputActive}
                         setIsInputActive={setIsInputActive}
+                        textColors={["#E8D8A1"]}
                     />
                 </div>
                 {/* Input removed, user types directly in TextType */}
             </div>
 
-            <div className="w-[300px] h-full right-0 top-0 absolute border-2 border-[#E8D8A1] bg-[#000A2233]">
+            <div className="w-[300px] h-screen right-0 top-0 absolute bg-[#000A2233]">
 
-                <Plate className="absolute left-0 right-0 p-2 overflow-y-auto" pathDataTemplate="M 0 0 H width V height H 0 Z">
-                    <h4 className="text-md text-slate-300 mb-2">Abilities</h4>
+                <Plate className="w-full h-full left-0 right-0 p-2 flex" pathDataTemplate="M 0 0 H width V height H 0 Z">
+                    <h4 className="w-full text-md text-slate-300 mb-2">Abilities</h4>
 
-                    <div className="space-y-2">
+                    <div className="w-full h-full min-height:0 overflow-y-auto">
                         {abilities.map((a, i) => (
                             <AbilityCard
                                 key={a.id}
-                                ref={(el) => {
-                                    abilityRefs.current[i] = el;
-                                }}
+                                ref={(el) => { abilityRefs.current[i] = el; }}
                                 name={a.name}
                                 image={a.image}
                                 cost={abilityCosts[i]}
                                 keybind={keymap[i]}
                                 onClick={() => attemptBuy(i)}
+                                className="mb-2"
                             />
                         ))}
                     </div>

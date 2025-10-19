@@ -140,7 +140,7 @@ const Plate: React.FC<PlateProps> = ({
                     />{" "}
                     {/* Stroke path with spotlight effect */}
                 </svg>
-                <div className="h-full w-full relative">{children}</div>
+                <div className="h-full w-full">{children}</div>
             </motion.div>
         </div>
     )
