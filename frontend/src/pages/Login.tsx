@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { usePage, CurrentPage } from '../PageProvider'
+import Plate from '@/components/Plate';
 
 function Instructions() {
   return (
@@ -55,11 +56,13 @@ function NameEntry() {
 
 export default function Login() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-5">
-      {/* <h1 className="text-2xl font-bold mb-8 text-white">Login</h1> */}
-      <div className="gap-4 max-w-4xl w-full content-center">
-        <NameEntry />
-        <Instructions />
+    <div className="w-screen h-screen flex flex-col items-center justify-center p-4">
+      <div className="w-[800px]">
+        <h4 className="w-full text-8xl font-parismatch text-[#E8D8A1] mb-8">Multi-Mac</h4>
+        <div className="gap-4 w-full content-center px-4 md:px-8 lg:px-16 pointer-events-auto">
+          <NameEntry />
+          <Instructions />
+        </div>
       </div>
     </div>
   )

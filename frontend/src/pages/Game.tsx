@@ -14,8 +14,9 @@ export default function Game() {
     const [inputValue, setInputValue] = useState<string>("")
     const [timer, ___] = useState<number>(60);
 
-    const { socket, question, score, coins, players } = usePage();
-    // setDifficulty(question.difficulty)
+    const { socket, question, score = 0, coins = 0, players } = usePage();
+    // Ensure question is defined with default values
+    // setDifficulty(safeQuestion.difficulty)
 
     const inputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;
@@ -107,26 +108,34 @@ export default function Game() {
                     </div>
                 </Plate>
             </div>
-
-            <div className="max-w-[900px] mx-auto flex justify-around text-2xl border p-3 border-[#E8D8A1]">
-                <StatisticsItem name="score" value={score} />
-                <StatisticsItem name="coins" value={coins} />
-                <StatisticsItem name="difficulty" value={question.difficulty} />
-                <StatisticsItem name="timer" value={timer} />
-            </div>
-            <div className="max-w-[800px] mx-auto h-full flex flex-col items-center justify-center">
-                <div className="flex justify-center items-center w-full text-center mb-6 text-8xl">
-                    <p className="pr-5 max-w-[30vw]">{question.question}</p>
-                    <input
-                        className="appearance-none firefox:textfield ml-1 bg-transparent border-none outline-none text-inherit w-auto inline-block max-w-[6ch]"
-                        type="number"
-                        autoFocus
-                        value={inputValue}
-                        onChange={inputHandler}
-                    />
+            <div className="max-w-[calc(100vw-614px)] w-full h-full inline-flex flex-col items-center justify-center">
+                <Plate className="w-full h-16 top-0 mx-auto flex items-center justify-around mb-2 bg-[#000A2233]" pathDataTemplate="M 8 0 H width-L1 h 56 l 8 8 V height-L1 v 56 l -8 8 H ts h -56 l -8 -8 V 8 l 8 -8 Z">
+                    <div className="w-full mx-auto flex justify-around text-2xl p-3">
+                        <StatisticsItem name="score" value={score ?? 0} />
+                        <StatisticsItem name="coins" value={coins ?? 0} />
+                        <StatisticsItem name="difficulty" value={question?.difficulty ?? 1} />
+                        <StatisticsItem name="timer" value={timer ?? 0} />
+                    </div>
+                </Plate>
+                    
+                <div className="w-full mx-auto h-full flex flex-col items-center justify-center">
+                    <Plate className="w-full h-full p-6" pathDataTemplate="M 8 8 h 48 l 8 -8 H width-L1 l 8 8 h 48 v 48 l 8 8 V height-L1 l -8 8 v 48 h -48 l -8 8 H ts l -8 -8 h -48 v -48 l -8 -8 V ts l 8 -8 v -48 Z M 32 0 v ts M 0 32 h ts M width-L.5 0 v ts M width ts-1/2 h -ts M width-L.5 height v -ts M width height-L.5 h -ts M ts-1/2 height v -ts M 0 height-L.5 h ts">
+                        <div className="w-full h-full text-center mb-6">
+                            <div className="justify-center items-center w-full text-center mb-6 text-8xl">
+                                <p className="pr-5 max-w-[30vw]">64/32=</p>
+                                <input
+                                    className="appearance-none firefox:textfield ml-1 bg-transparent border-none outline-none text-inherit w-auto inline-block max-w-[6ch]"
+                                    type="number"
+                                    autoFocus
+                                    value={inputValue}
+                                    onChange={inputHandler}
+                                />
+                            </div>
+                        </div>
+                    </Plate>
+                    
                 </div>
             </div>
-
             <div className="max-w-[300px] w-full h-full inline-flex flex-col right-0 top-0 absolute">
                 <Plate className="w-full h-16 left-0 right-0 p-2 flex mb-2 bg-[#000A2233]" pathDataTemplate="M 8 0 H width-L1 h 56 l 8 8 V height-L1 v 56 l -8 8 H ts h -56 l -8 -8 V 8 l 8 -8 Z">
                     <h4 className="w-full text-4xl font-parismatch text-[#E8D8A1] mb-2">Abilities</h4>
