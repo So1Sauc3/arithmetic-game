@@ -80,12 +80,18 @@ startGameLoop:
 			break startGameLoop
 
 		case <-l.done:
-			l.log("closing")
-			l.hub.unregisterLobby(l)
+			l.close()
 			return
+
+		case msg := <-l.lobbyRead:
+			_, ok := msg.(ClientLobbySkipWait)
+			if ok {
+				break startGameLoop
+			}
 		}
 	}
 
+	l.open = false
 	startGameTimer.Stop()
 
 	l.log("wait over, starting game")
@@ -129,8 +135,7 @@ startGameLoop:
 			l.unregisterClient(c)
 
 		case <-l.done:
-			l.log("closing")
-			l.hub.unregisterLobby(l)
+			l.close()
 			return
 
 		}
@@ -193,6 +198,7 @@ func (l *Lobby) eliminationHandler() {
 
 	for range eliminationTimer.C {
 		if l.activeClientCount.Load() == 0 {
+			close(l.done)
 			return
 		}
 
@@ -243,6 +249,7 @@ func (l *Lobby) eliminationHandler() {
 		}
 
 		if l.activeClientCount.Load() == 0 {
+			close(l.done)
 			return
 		}
 	}
@@ -270,6 +277,14 @@ func (l *Lobby) handleLobbyStatusEffect(cl ClientLobbyStatusEffect) {
 			Difficulty: byte(newDifficulty),
 		}
 	}
+}
+
+func (l *Lobby) close() {
+	l.log("closing")
+	for _, client := range l.clients {
+		client.conn.Close()
+	}
+	l.hub.unregisterLobby(l)
 }
 
 // GenerateQuestion returns (question string, expectedResult)

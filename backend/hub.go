@@ -39,6 +39,8 @@ func (h *Hub) Run() {
 }
 
 func (h *Hub) findBestLobby() *Lobby {
+	log.Println("finding best lobby")
+
 	h.lobbiesMu.Lock()
 	defer h.lobbiesMu.Unlock()
 

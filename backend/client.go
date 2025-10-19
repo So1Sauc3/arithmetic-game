@@ -75,6 +75,9 @@ func (c *Client) readPump() {
 
 		switch clientMessage := clientMessage.(type) {
 
+		case *SkipWait:
+			c.read <- ClientLobbySkipWait{}
+
 		case *Submission:
 			if !c.playing.Load() {
 				break
@@ -166,7 +169,7 @@ func (c *Client) readPump() {
 			case DoubleTapPowerup, CoinLeakPowerup, HardModePowerup:
 				c.read <- ClientLobbyStatusEffect{
 					ClientID: int(clientMessage.AffectedPlayer),
-					Powerup: clientMessage.PowerupID,
+					Powerup:  clientMessage.PowerupID,
 				}
 			}
 

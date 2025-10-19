@@ -17,3 +17,8 @@ type ClientLobbyStatusEffect struct {
 }
 
 func (ClientLobbyStatusEffect) clientLobbyMessage() {}
+
+type ClientLobbySkipWait struct {
+}
+
+func (ClientLobbySkipWait) clientLobbyMessage() {}
