@@ -5,22 +5,11 @@ import TextType from "@/components/TextType";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import StatisticsItem from "@/components/StatisticsItem";
 import AbilityCard from "@/components/AbilityCard";
+import { usePage } from "@/PageProvider";
 
 type Ability = { id: string; name: string; image?: string };
 
-function generateEquation() {
-    const a = Math.floor(Math.random() * 12) + 1;
-    const b = Math.floor(Math.random() * 12) + 1;
-    const op = ['+', '-', '*'][Math.floor(Math.random() * 3)];
-    const expr = `${a} ${op} ${b} = `;
-    // eslint-disable-next-line no-eval
-    // safe-ish for small ints
-    const answer = 0;
-    return { expr, answer } as { expr: string; answer: number };
-}
-
 export default function Game() {
-    const [equation, setEquation] = useState<string>("0 + 0");
     const [answer, setAnswer] = useState<number>(0);
     const [inputValue, setInputValue] = useState<string>("");
     // Track focus for TextType input
@@ -29,6 +18,9 @@ export default function Game() {
     const [coin, setCoin] = useState<number>(0);
         const [difficulty, setDifficulty] = useState<number>(1);
     const [timer, setTimer] = useState<number>(60);
+    const { socket, question } = usePage();
+
+    useEffect(() => { inputValue !== "" && socket.sendSubmit(Number(inputValue)); }, [inputValue])
 
         // 10 abilities, keys QWERTYUIOP
         const keymap = 'QWERTYUIOP'.split('');
@@ -43,8 +35,6 @@ export default function Game() {
         const inputWrapperRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
-        const { expr, answer } = generateEquation();
-        setEquation(expr);
         setAnswer(answer);
     }, []);
 
@@ -73,9 +63,6 @@ export default function Game() {
             setScore(s => s + 10 * difficulty);
             setCoin(c => c + 1);
             // new equation
-            const { expr, answer: a } = generateEquation();
-            setEquation(expr);
-            setAnswer(a);
         } else {
             // penalize
             setScore(s => Math.max(0, s - 2));
@@ -180,7 +167,7 @@ export default function Game() {
             <div className="max-w-[800px] mx-auto h-full flex flex-col items-center justify-center">
                 <div className="w-full text-center mb-6">
                     <TextType
-                        text={equation}
+                        text={question.question}
                         typingSpeed={40}
                         initialDelay={100}
                         className="text-8xl font-bold"
