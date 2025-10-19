@@ -120,6 +120,9 @@ startGameLoop:
 					NewScore: uint32(msg.NewScore),
 				})
 
+			case ClientLobbyStatusEffect:
+				go l.handleLobbyStatusEffect(msg)
+
 			}
 
 		case c := <-l.unregister:
@@ -241,6 +244,30 @@ func (l *Lobby) eliminationHandler() {
 
 		if l.activeClientCount.Load() == 0 {
 			return
+		}
+	}
+}
+
+func (l *Lobby) handleLobbyStatusEffect(cl ClientLobbyStatusEffect) {
+	c := l.clients[cl.ClientID]
+
+	switch cl.Powerup {
+	case DoubleTapPowerup:
+
+	case CoinLeakPowerup:
+		c.coinMult = max(c.coinMult-0.1, 0.0)
+		c.write <- MultipliersChanged{
+			ScoreMult: c.scoreMult,
+			CoinMult:  c.coinMult,
+		}
+
+	case HardModePowerup:
+		newDifficulty := min(10, c.difficulty + 5)
+		question, expectedResult := GenerateQuestion(newDifficulty)
+		c.expectedResult = expectedResult
+		c.write <- NewQuestion{
+			Question: question,
+			Difficulty: byte(newDifficulty),
 		}
 	}
 }

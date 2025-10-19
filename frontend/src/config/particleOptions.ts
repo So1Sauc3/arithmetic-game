@@ -5,17 +5,17 @@ export const particlesOptions = {
   fullScreen: { enable: false },
   background: {
     color: {
-      value: "#01051A",
+      value: "#010621",
     },
   },
   fpsLimit: 60,
   particles: {
-    color: { value: "#BAAE81" },
+    color: { value: "#E8D8A1" },
     links: {
-      color: "#BAAE81",
+      color: "#E8D8A1",
       distance: 150,
       enable: true,
-      opacity: 0.5,
+      opacity: .8,
       width: 1,
     },
     collisions: { enable: true },
@@ -31,7 +31,7 @@ export const particlesOptions = {
       density: { enable: true, area: 800 },
       value: 80,
     },
-    opacity: { value: 0.5 },
+    opacity: { value: .8 },
   shape: { type: "star" },
     size: { random: true, value: 3 },
   },
@@ -47,7 +47,7 @@ export const particlesOptions = {
       grab: {
         distance: 100,
         links: {
-          opacity: 0.5
+          opacity: .8
         }
       },
     },

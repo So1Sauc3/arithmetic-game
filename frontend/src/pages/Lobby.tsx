@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { usePage, CurrentPage }  from  '../PageProvider'
 
 function GameInfo() {
     const [currentTip, setCurrentTip] = useState(0);
@@ -108,10 +108,11 @@ function PlayerList() {
 }
 
 export default function Lobby() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+  const { setPage } = usePage();
 
   const handleLeaveLobby = () => {
-    navigate('/');
+    setPage(CurrentPage.Login)
   };
 
   return (

@@ -13,7 +13,7 @@ func (ClientLobbySubmission) clientLobbyMessage() {}
 
 type ClientLobbyStatusEffect struct {
 	ClientID ClientId
-	// status effect
+	Powerup  byte
 }
 
 func (ClientLobbyStatusEffect) clientLobbyMessage() {}

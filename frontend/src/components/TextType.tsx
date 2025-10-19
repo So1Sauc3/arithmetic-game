@@ -5,6 +5,10 @@ import type { ElementType } from 'react';
 import { gsap } from 'gsap';
 
 interface TextTypeProps {
+  // For equation input mode
+  userInput?: string;
+  isInputActive?: boolean;
+  setIsInputActive?: (active: boolean) => void;
   className?: string;
   showCursor?: boolean;
   hideCursorWhileTyping?: boolean;
@@ -34,7 +38,7 @@ const TextType = ({
   deletingSpeed = 30,
   loop = true,
   className = '',
-  showCursor = true,
+  showCursor = false,
   hideCursorWhileTyping = false,
   cursorCharacter = '|',
   cursorClassName = '',
@@ -44,6 +48,9 @@ const TextType = ({
   onSentenceComplete,
   startOnVisible = false,
   reverseMode = false,
+  userInput,
+  isInputActive,
+  setIsInputActive,
   ...props
 }: TextTypeProps & React.HTMLAttributes<HTMLElement>) => {
   const [displayedText, setDisplayedText] = useState('');
@@ -52,7 +59,11 @@ const TextType = ({
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(!startOnVisible);
   const cursorRef = useRef<HTMLSpanElement>(null);
-  const containerRef = useRef<HTMLElement>(null);
+  // Use correct ref type for input mode
+  const containerRef = userInput !== undefined
+    ? useRef<HTMLDivElement>(null)
+    : useRef<HTMLElement>(null);
+  const inputRef = useRef<HTMLSpanElement>(null);
 
   const textArray = useMemo(() => (Array.isArray(text) ? text : [text]), [text]);
 
@@ -98,10 +109,10 @@ const TextType = ({
     }
   }, [showCursor, cursorBlinkDuration]);
 
+  // Only run typing animation if not in input mode
   useEffect(() => {
-    if (!isVisible) return;
 
-  let timeout: ReturnType<typeof setTimeout> | undefined;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
 
     const currentText = textArray[currentTextIndex];
     const processedText = reverseMode ? currentText.split('').reverse().join('') : currentText;
@@ -153,6 +164,7 @@ const TextType = ({
       if (timeout) clearTimeout(timeout);
     };
   }, [
+    userInput,
     currentCharIndex,
     displayedText,
     isDeleting,
@@ -172,6 +184,15 @@ const TextType = ({
   const shouldHideCursor =
     hideCursorWhileTyping && (currentCharIndex < textArray[currentTextIndex].length || isDeleting);
 
+  // Determine if animation is finished
+  const animationFinished = displayedText.length === textArray[currentTextIndex].length && !isDeleting;
+
+  // Handler for user input (if enabled)
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (setIsInputActive) setIsInputActive(true);
+    if (props.onChange) props.onChange(e);
+  };
+
   return createElement(
     Component,
     {
@@ -182,6 +203,19 @@ const TextType = ({
     <span className="inline" style={{ color: getCurrentTextColor() }}>
       {displayedText}
     </span>,
+    // User input field appears after animation is finished
+    userInput !== undefined && animationFinished && (
+      <input
+        ref={inputRef as React.RefObject<HTMLInputElement>}
+        type="text"
+        value={userInput}
+        onChange={handleInputChange}
+        className="ml-1 bg-transparent border-none outline-none text-inherit w-auto inline-block"
+        autoFocus
+        style={{ width: `${Math.max(userInput.length, 1)}ch` }}
+      />
+    ),
+    // Blinking cursor always at the end
     showCursor && (
       <span
         ref={cursorRef}

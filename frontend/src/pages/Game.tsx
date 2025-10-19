@@ -2,7 +2,6 @@
 
 import AnimatedList from "@/components/AnimatedList";
 import TextType from "@/components/TextType";
-import { Input } from "@/components/ui/input";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import StatisticsItem from "@/components/StatisticsItem";
 import AbilityCard from "@/components/AbilityCard";
@@ -13,10 +12,10 @@ function generateEquation() {
     const a = Math.floor(Math.random() * 12) + 1;
     const b = Math.floor(Math.random() * 12) + 1;
     const op = ['+', '-', '*'][Math.floor(Math.random() * 3)];
-    const expr = `${a} ${op} ${b}`;
+    const expr = `${a} ${op} ${b} =`;
     // eslint-disable-next-line no-eval
     // safe-ish for small ints
-    const answer = eval(expr);
+    const answer = 0;
     return { expr, answer } as { expr: string; answer: number };
 }
 
@@ -24,6 +23,8 @@ export default function Game() {
     const [equation, setEquation] = useState<string>("0 + 0");
     const [answer, setAnswer] = useState<number>(0);
     const [inputValue, setInputValue] = useState<string>("");
+    // Track focus for TextType input
+    const [isInputActive, setIsInputActive] = useState<boolean>(true);
     const [score, setScore] = useState<number>(0);
     const [coin, setCoin] = useState<number>(0);
         const [difficulty, setDifficulty] = useState<number>(1);
@@ -84,17 +85,33 @@ export default function Game() {
         setInputValue("");
     }, [inputValue, answer, difficulty]);
 
+    // Listen for key events and update inputValue (only numbers)
+    useEffect(() => {
+        if (!isInputActive) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submit();
+                return;
+            }
+            if (e.key === 'Backspace') {
+                setInputValue((v) => v.slice(0, -1));
+                return;
+            }
+            if (/^[0-9]$/.test(e.key)) {
+                setInputValue((v) => v.length < 6 ? v + e.key : v); // max 6 digits
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isInputActive, submit]);
+
         useEffect(() => {
             // bump difficulty every 100 points
             setDifficulty(Math.max(1, Math.floor(score / 100) + 1));
         }, [score]);
 
-    const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            submit();
-        }
-    };
+    // No longer needed: onKeyDown for Input
 
     const scoreboardItems = useMemo(() => {
         return Array.from({ length: 20 }, (_, i) => `Player ${i + 1} — ${Math.max(0, 100 - i * 3)}`);
@@ -143,7 +160,7 @@ export default function Game() {
 
     return (
         <div className="w-screen h-screen relative overflow-hidden text-white">
-            <div className="w-[300px] h-full left-0 top-0 absolute border border-[#ff0000]">
+            <div className="w-[300px] h-screen left-0 top-0 absolute border-[#E8D8A1] border-2">
                 <div className="p-4 border-b border-[#111]">
                     <h3 className="text-lg font-semibold">Scoreboard</h3>
                 </div>
@@ -158,21 +175,21 @@ export default function Game() {
 
             <div className="max-w-[800px] mx-auto h-full flex flex-col items-center justify-center">
                 <div className="w-full text-center mb-6">
-                    <TextType text={equation} typingSpeed={40} initialDelay={100} className="text-5xl font-bold" />
-                </div>
-
-                <div className="w-[420px]" ref={inputWrapperRef}>
-                    <Input
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        onKeyDown={onKeyDown}
-                        placeholder="Type your answer and press Enter"
+                    <TextType
+                        text={equation}
+                        typingSpeed={40}
+                        initialDelay={100}
+                        className="text-5xl font-bold"
+                        userInput={inputValue}
+                        isInputActive={isInputActive}
+                        setIsInputActive={setIsInputActive}
                     />
                 </div>
+                {/* Input removed, user types directly in TextType */}
             </div>
 
-            <div className="w-[300px] h-full right-0 top-0 absolute border border-[#0000ff]">
-                <div className="w-full h-[180px] top-0 absolute border-b border-[#0a0a1a] p-4">
+            <div className="w-[300px] h-full right-0 top-0 absolute border border-[#E8D8A1]">
+                <div className="w-full h-[180px] top-0 absolute border-b border-[#E8D8A1] p-4">
                     <h4 className="text-sm text-slate-300 mb-2">Statistics</h4>
                     <div className="space-y-2">
                         <StatisticsItem name="score" value={score} />

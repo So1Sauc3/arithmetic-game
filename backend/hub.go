@@ -91,6 +91,13 @@ func (h *Hub) ServeWs(w http.ResponseWriter, r *http.Request) {
 		write: make(chan ServerMessage),
 	}
 
+	_, _, err = conn.ReadMessage()
+	if err != nil {
+		c.log("error waiting for reading message: %+v", err)
+		conn.Close()
+		return
+	}
+
 	hubGreetingMessage, _ := HubGreeting{}.MarshalBinary()
 	err = conn.WriteMessage(websocket.BinaryMessage, hubGreetingMessage)
 
