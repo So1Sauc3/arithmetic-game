@@ -11,6 +11,6 @@ fmt:
 	cd backend && gofmt -l -s -w .
 
 clean:
-	rm backend/leet-guys
+	rm -f backend/arithmetic-game
 
 .PHONY: run front build fmt clean
