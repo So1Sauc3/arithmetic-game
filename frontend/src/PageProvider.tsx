@@ -42,6 +42,7 @@ function connect(
     setStatusEffects: React.Dispatch<React.SetStateAction<StatusEffectId[]>>,
     setScoreMultiplier: React.Dispatch<React.SetStateAction<number>>,
     setCoinMultiplier: React.Dispatch<React.SetStateAction<number>>,
+    setPage: React.Dispatch<React.SetStateAction<CurrentPage>>,
 ): (name: string) => Promise<void> {
     return async (name: string) => {
         const socket = await socketConnect(name);
@@ -64,6 +65,7 @@ function connect(
         });
         socket.onNewQuestion((m: NewQuestion) => {
             setQuestion(m)
+            setPage(CurrentPage.Game)
         });
         socket.onPurchaseConfirmed((m: PurchaseConfirmed) => {
             setCoins(m.coins)
@@ -113,7 +115,7 @@ export function PageProvider({ children }: { children: React.ReactNode }) {
   return (
     <PageContext.Provider value={{
         page, setPage,
-        socket, connectSocket: connect(setSocket, setQuestion, setPlayers, setScore, setCoins, setStatusEffects, setScoreMultiplier, setCoinMultiplier),
+        socket, connectSocket: connect(setSocket, setQuestion, setPlayers, setScore, setCoins, setStatusEffects, setScoreMultiplier, setCoinMultiplier, setPage),
         question, setQuestion,
         players, setPlayers,
         score, setScore,
