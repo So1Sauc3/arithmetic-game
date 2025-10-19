@@ -20,8 +20,11 @@ type Client struct {
 	hub *Hub
 
 	// roomWrite chan PendingMessage
-	read  chan ClientLobbyMessage
-	write chan ServerMessage
+	read       chan ClientLobbyMessage
+	write      chan ServerMessage
+	unregister chan *Client
+
+	statusEffects [StatusEffectCount]atomic.Bool
 
 	closed atomic.Bool
 
@@ -54,6 +57,10 @@ func (c *Client) readPump() {
 			}
 			c.log("error reading message from websocket: %+v", err.Error())
 			break
+		}
+
+		if c.closed.Load() {
+			continue
 		}
 
 		clientMessage, err := ParseClientMessage(message)
@@ -155,6 +162,12 @@ func (c *Client) readPump() {
 					Question:   question,
 					Difficulty: byte(c.difficulty),
 				}
+
+			case DoubleTapPowerup, CoinLeakPowerup, HardModePowerup:
+				c.read <- ClientLobbyStatusEffect{
+					ClientID: int(clientMessage.AffectedPlayer),
+					Powerup: clientMessage.PowerupID,
+				}
 			}
 
 			c.write <- PurchaseConfirmed{
@@ -162,6 +175,13 @@ func (c *Client) readPump() {
 			}
 		}
 	}
+
+	c.log("unregistering")
+
+	c.closed.Store(true)
+	close(c.write)
+
+	c.unregister <- c
 }
 
 func (c *Client) writePump() {
@@ -191,6 +211,9 @@ func (c *Client) writePump() {
 	}
 	c.log("writePump closed")
 }
+
+// func (c *Client) doubleTapHandler() {
+// }
 
 func (c *Client) log(format string, v ...any) {
 	log.Printf("client %d: %s", c.id, fmt.Sprintf(format, v...))

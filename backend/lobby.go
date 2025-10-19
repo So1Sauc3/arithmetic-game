@@ -12,8 +12,9 @@ import (
 type ClientId = int
 
 type Lobby struct {
-	id       int
-	register chan *Client
+	id         int
+	register   chan *Client
+	unregister chan *Client
 
 	lobbyRead chan ClientLobbyMessage
 
@@ -22,7 +23,7 @@ type Lobby struct {
 	// contains all clients even those disconnected
 	clients map[ClientId]*Client
 
-	activeClientCount atomic.Uint32
+	activeClientCount atomic.Int32
 
 	hub *Hub
 
@@ -33,14 +34,17 @@ type Lobby struct {
 
 func newLobby(id int, hub *Hub) *Lobby {
 	l := &Lobby{
-		id:       id,
-		register: make(chan *Client),
+		id:         id,
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
 
 		lobbyRead: make(chan ClientLobbyMessage),
 
 		clients: make(map[ClientId]*Client),
 
 		hub: hub,
+
+		done: make(chan struct{}),
 	}
 
 	return l
@@ -52,13 +56,15 @@ func (l *Lobby) clientCount() int {
 
 func (l *Lobby) run() {
 	l.log("running")
+
 	l.open = true
 
-	startGameTimer := time.NewTimer(1 * time.Second)
+	startGameTimer := time.NewTimer(time.Minute)
 
 	clientId := 0
 
 	l.log("lobby started, waiting for players")
+
 startGameLoop:
 	for {
 		select {
@@ -67,10 +73,20 @@ startGameLoop:
 			clientId++
 			l.registerClient(client)
 
+		case client := <-l.unregister:
+			l.unregisterClient(client)
+
 		case <-startGameTimer.C:
 			break startGameLoop
+
+		case <-l.done:
+			l.log("closing")
+			l.hub.unregisterLobby(l)
+			return
 		}
 	}
+
+	startGameTimer.Stop()
 
 	l.log("wait over, starting game")
 
@@ -91,13 +107,32 @@ startGameLoop:
 		}
 	}
 
-	for msg := range l.lobbyRead {
-		switch msg := msg.(type) {
-		case ClientLobbySubmission:
-			l.broadcast(OpponentScoreChanged{
-				PlayerID: byte(msg.ClientID),
-				NewScore: uint32(msg.NewScore),
-			})
+	go l.eliminationHandler()
+
+	for {
+		select {
+		case msg := <-l.lobbyRead:
+			switch msg := msg.(type) {
+
+			case ClientLobbySubmission:
+				l.broadcast(OpponentScoreChanged{
+					PlayerID: byte(msg.ClientID),
+					NewScore: uint32(msg.NewScore),
+				})
+
+			case ClientLobbyStatusEffect:
+				go l.handleLobbyStatusEffect(msg)
+
+			}
+
+		case c := <-l.unregister:
+			l.unregisterClient(c)
+
+		case <-l.done:
+			l.log("closing")
+			l.hub.unregisterLobby(l)
+			return
+
 		}
 	}
 }
@@ -111,13 +146,17 @@ func (l *Lobby) registerClient(c *Client) bool {
 	l.broadcast(NewRegisteredPlayer{
 		Player{ID: byte(c.id), Name: c.name}})
 
+	c.unregister = l.unregister
 	c.read = l.lobbyRead
+
 	go c.readPump()
 
 	players := []Player{}
 	for _, client := range l.clients {
-		players = append(players,
-			Player{ID: byte(client.id), Name: client.name})
+		if !client.closed.Load() {
+			players = append(players,
+				Player{ID: byte(client.id), Name: client.name})
+		}
 	}
 
 	c.write <- LobbyGreeting{Players: players}
@@ -130,6 +169,17 @@ func (l *Lobby) registerClient(c *Client) bool {
 	return full
 }
 
+func (l *Lobby) unregisterClient(c *Client) {
+	l.activeClientCount.Add(-1)
+
+	l.broadcast(OpponentEliminated{byte(c.id)})
+
+	if l.activeClientCount.Load() == 0 {
+		l.log("all clients left")
+		close(l.done)
+	}
+}
+
 func (l *Lobby) broadcast(msg ServerMessage) {
 	for _, c := range l.clients {
 		if !c.closed.Load() {
@@ -138,8 +188,88 @@ func (l *Lobby) broadcast(msg ServerMessage) {
 	}
 }
 
-func randInt(min, max int) int {
-	return rand.IntN(max-min+1) + min
+func (l *Lobby) eliminationHandler() {
+	eliminationTimer := time.NewTimer(30 * time.Second)
+
+	for range eliminationTimer.C {
+		if l.activeClientCount.Load() == 0 {
+			return
+		}
+
+		l.log("eliminating")
+
+		const inf uint = ^uint(0)
+		var c1, c2, c3 *Client
+		min1, min2, min3 := inf, inf, inf
+
+		for _, c := range l.clients {
+			if c.closed.Load() {
+				continue
+			}
+
+			s := c.score
+			switch {
+			case s < min1:
+				c1, c2, c3 = c, c1, c2
+				min1, min2, min3 = s, min1, min2
+			case s < min2:
+				c2, c3 = c, c2
+				min2, min3 = s, min2
+			case s < min3:
+				c3 = c
+				min3 = s
+			}
+		}
+
+		if c1 != nil {
+			c1.write <- Eliminated{byte(l.activeClientCount.Load())}
+			l.activeClientCount.Add(-1)
+			c1.closed.Store(true)
+			l.broadcast(OpponentEliminated{byte(c1.id)})
+		}
+
+		if c2 != nil {
+			c2.write <- Eliminated{byte(l.activeClientCount.Load())}
+			l.activeClientCount.Add(-1)
+			c2.closed.Store(true)
+			l.broadcast(OpponentEliminated{byte(c2.id)})
+		}
+
+		if c3 != nil {
+			c3.write <- Eliminated{byte(l.activeClientCount.Load())}
+			l.activeClientCount.Add(-1)
+			c3.closed.Store(true)
+			l.broadcast(OpponentEliminated{byte(c3.id)})
+		}
+
+		if l.activeClientCount.Load() == 0 {
+			return
+		}
+	}
+}
+
+func (l *Lobby) handleLobbyStatusEffect(cl ClientLobbyStatusEffect) {
+	c := l.clients[cl.ClientID]
+
+	switch cl.Powerup {
+	case DoubleTapPowerup:
+
+	case CoinLeakPowerup:
+		c.coinMult = max(c.coinMult-0.1, 0.0)
+		c.write <- MultipliersChanged{
+			ScoreMult: c.scoreMult,
+			CoinMult:  c.coinMult,
+		}
+
+	case HardModePowerup:
+		newDifficulty := min(10, c.difficulty + 5)
+		question, expectedResult := GenerateQuestion(newDifficulty)
+		c.expectedResult = expectedResult
+		c.write <- NewQuestion{
+			Question: question,
+			Difficulty: byte(newDifficulty),
+		}
+	}
 }
 
 // GenerateQuestion returns (question string, expectedResult)
@@ -211,4 +341,8 @@ func GenerateQuestion(difficulty uint) (string, int) {
 
 func (l *Lobby) log(format string, v ...any) {
 	log.Printf("lobby %d: %s", l.id, fmt.Sprintf(format, v...))
+}
+
+func randInt(min, max int) int {
+	return rand.IntN(max-min+1) + min
 }
