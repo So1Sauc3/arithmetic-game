@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import StatisticsItem from "@/components/StatisticsItem";
 import AbilityCard from "@/components/AbilityCard";
 import Plate from "@/components/Plate";
+import { usePage } from "../PageProvider"
 
 type Ability = { id: string; name: string; image?: string };
 
@@ -92,13 +93,13 @@ export default function Game() {
         <div className="w-screen h-screen relative overflow-hidden text-[#E8D8A1]">
             <div className="w-[300px] h-full left-0 top-0 absolute bg-[#000A2233]">
                 <Plate className="w-full h-16 left-0 right-0 p-2 flex mb-2" pathDataTemplate="M 0 0 H width V height H 0 Z">
-                    <h4 className="w-full text-md text-slate-300 mb-2">Scoreboard</h4>
+                    <h4 className="w-full text-3xl text-slate-300 mb-2">Scoreboard</h4>
                 </Plate>
                 <Plate className="w-full h-full absolute flex left-0 right-0" pathDataTemplate="M 0 0 H width V height H 0 Z">
                     <div className="w-full h-full left-0 top-0 absolute">
                         <AnimatedList
                             className="overflow-y-auto"
-                            items={scoreboardItems}
+                            items={Object.values(players).map(p => p.name)}
                             itemClassName="cursor-pointer"
                             showGradients={true}
                             displayScrollbar={false}
@@ -111,8 +112,8 @@ export default function Game() {
             <Plate className="max-w-[calc(100vw-612px)] h-16 top-0 mx-auto flex items-center justify-around bg-[#000A2233]" pathDataTemplate="M 0 0 H width V height H 0 Z">
                 <div className="w-full flex justify-around text-2xl p-3">
                     <StatisticsItem name="score" value={score} />
-                    <StatisticsItem name="coins" value={coin} />
-                    <StatisticsItem name="difficulty" value={difficulty} />
+                    <StatisticsItem name="coins" value={coins} />
+                    {/* <StatisticsItem name="difficulty" value={question.difficulty} /> */}
                     <StatisticsItem name="timer" value={timer} />
                 </div>
             </Plate>
@@ -133,7 +134,7 @@ export default function Game() {
 
             <div className="w-[300px] h-screen right-0 top-0 absolute bg-[#000A2233]">
                 <Plate className="w-full h-16 left-0 right-0 p-2 flex mb-2" pathDataTemplate="M 0 0 H width V height H 0 Z">
-                    <h4 className="w-full text-md text-slate-300 mb-2">Abilities</h4>
+                    <h4 className="w-full text-3xl text-slate-300 mb-2">Abilities</h4>
                 </Plate>
                 <Plate className="w-full h-full left-0 right-0 p-2 flex" pathDataTemplate="M 0 0 H width V height H 0 Z">
                     <div className="w-full h-full min-height:0 overflow-y-auto">
