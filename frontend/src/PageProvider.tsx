@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import type { CorrectSubmission, LobbyHello, NewPlayer, NewQuestion, Player, PurchaseConfirmed, Socket, StatusChanged, StatusEffectId, OpponentStatusChanged, OpponentEliminated, MultipliersChanged} from './lib/comm.ts';
+import type { CorrectSubmission, LobbyHello, NewPlayer, NewQuestion, Player, PurchaseConfirmed, Socket, StatusChanged, StatusEffectId, OpponentStatusChanged, OpponentEliminated, MultipliersChanged, StartGame} from './lib/comm.ts';
 import { connect as socketConnect } from './lib/comm.ts';
 
 export const enum CurrentPage {
@@ -66,7 +66,6 @@ function connect(
         socket.onNewQuestion((m: NewQuestion) => {
             // console.log("HEREREEREREE")
             setQuestion(m)
-            setPage(CurrentPage.Game)
         });
         socket.onPurchaseConfirmed((m: PurchaseConfirmed) => {
             setCoins(m.coins)
@@ -96,6 +95,9 @@ function connect(
         socket.onMultipliersChanged((m: MultipliersChanged) => {
             setScoreMultiplier(m.scoreMultiplier);
             setCoinMultiplier(m.coinMultiplier);
+        })
+        socket.OnStartGame((_: StartGame) => {
+            setPage(CurrentPage.Game)
         })
         console.log(socket);
         socket.socket.addEventListener('open', (_) => socket.sendSubmit(0));

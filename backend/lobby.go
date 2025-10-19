@@ -109,6 +109,7 @@ startGameLoop:
 
 		client.expectedResult = expectedResult
 
+		client.write <- StartGame{}
 		client.write <- NewQuestion{
 			Difficulty: byte(client.difficulty),
 			Question:   question,

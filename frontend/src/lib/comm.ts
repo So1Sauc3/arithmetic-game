@@ -60,6 +60,7 @@ export const ServerOp = {
     OpponentEliminated: 9,
     OpponentScoreChanged: 10,
     MultipliersChanged: 11,
+    StartGame: 12,
 } as const
 
 export type Player = {
@@ -132,12 +133,17 @@ export type MultipliersChanged = {
     coinMultiplier: number
 }
 
+export type StartGame = {
+    opcode: typeof ServerOp.StartGame
+}
+
 export type ServerMessage = HubHello | LobbyHello
     | NewPlayer | CorrectSubmission
     | NewQuestion | PurchaseConfirmed
     | StatusChanged | OpponentStatusChanged
     | Eliminated | OpponentEliminated
-    | OpponentScoreChanged | MultipliersChanged;
+    | OpponentScoreChanged | MultipliersChanged
+    | StartGame;
 
 const textDecoder = new TextDecoder('utf-8');
 const textEncoder = new TextEncoder();
@@ -312,6 +318,10 @@ function parseServerMessage(buffer: ArrayBuffer): ServerMessage {
                 return { opcode, scoreMultiplier, coinMultiplier } ;
             }
 
+        case 12: // Start Game
+            // No content
+            return { opcode } ;
+
         default:
             throw new Error('Unknown opcode: ' + opcode);
     }
@@ -343,6 +353,7 @@ export type Socket = {
     onEliminated: (arg0: (arg0: Eliminated) => void) => void,
     onOpponentEliminated: (arg0: (arg0: OpponentEliminated) => void) => void,
     onMultipliersChanged: (arg0: (arg0: MultipliersChanged) => void) => void,
+    OnStartGame: (arg0: (arg0: StartGame) => void) => void,
     sendSubmit: (answer: number) => void
     sendPurchase: (powerup: PowerupId, target: number) => void
     sendSkip: () => void
@@ -386,6 +397,7 @@ async function connect_raw(url: string): Promise<Socket> {
         onEliminated: (handler: (arg0: Eliminated) => void) => callIfOpCode(handler, ServerOp.Eliminated),
         onOpponentEliminated: (handler: (arg0: OpponentEliminated) => void) => callIfOpCode(handler, ServerOp.OpponentEliminated),
         onMultipliersChanged: (handler: (arg0: MultipliersChanged) => void) => callIfOpCode(handler, ServerOp.MultipliersChanged),
+        OnStartGame: (handler: (arg0: StartGame) => void) => callIfOpCode(handler, ServerOp.StartGame),
         sendSubmit: (answer: number) => { socket.send(serializeClientMessage({ opcode: ClientOp.Submit, answer })) },
         sendPurchase: (powerup: PowerupId, targetId: number) => { socket.send(serializeClientMessage({ opcode: ClientOp.Purchase, powerup, targetId })) },
         sendSkip: () => { socket.send(serializeClientMessage({ opcode: ClientOp.SkipWait })) },
