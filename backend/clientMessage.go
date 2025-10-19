@@ -14,9 +14,10 @@ type ClientMessage interface {
 
 // Opcodes
 const (
-	OpcodeRegister   byte = 0
-	OpcodeSubmission byte = 1
-	OpcodePowerup    byte = 2
+	OpcodeRegister byte = iota
+	OpcodeSubmission
+	OpcodePowerup
+	OpcodeSkipWait
 )
 
 // -------- Register --------
@@ -82,6 +83,22 @@ func (p *PowerupPurchase) UnmarshalBinary(data []byte) error {
 	return nil
 }
 
+// -------- Skip Wait --------
+
+type SkipWait struct {
+}
+
+func (*SkipWait) Opcode() byte { return OpcodeSkipWait }
+func (s *SkipWait) UnmarshalBinary(data []byte) error {
+	if len(data) < 1 {
+		return errors.New("skip wait message too short")
+	}
+	if data[0] != OpcodeSkipWait {
+		return fmt.Errorf("invalid opcode %d for SkipWait", data[0])
+	}
+	return nil
+}
+
 // -------- Dispatcher --------
 
 // ParseClientMessage parses the binary data into the correct ClientMessage.
@@ -97,6 +114,8 @@ func ParseClientMessage(data []byte) (ClientMessage, error) {
 		msg = &Submission{}
 	case OpcodePowerup:
 		msg = &PowerupPurchase{}
+	case OpcodeSkipWait:
+		msg = &SkipWait{}
 	default:
 		return nil, fmt.Errorf("unknown opcode %d", data[0])
 	}

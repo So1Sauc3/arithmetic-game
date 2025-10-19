@@ -30,6 +30,7 @@ type Lobby struct {
 	done chan struct{}
 
 	open bool
+	closed atomic.Bool
 }
 
 func newLobby(id int, hub *Hub) *Lobby {
@@ -58,6 +59,7 @@ func (l *Lobby) run() {
 	l.log("running")
 
 	l.open = true
+	l.closed.Store(false)
 
 	startGameTimer := time.NewTimer(time.Minute)
 
@@ -80,12 +82,18 @@ startGameLoop:
 			break startGameLoop
 
 		case <-l.done:
-			l.log("closing")
-			l.hub.unregisterLobby(l)
+			l.close()
 			return
+
+		case msg := <-l.lobbyRead:
+			_, ok := msg.(ClientLobbySkipWait)
+			if ok {
+				break startGameLoop
+			}
 		}
 	}
 
+	l.open = false
 	startGameTimer.Stop()
 
 	l.log("wait over, starting game")
@@ -101,6 +109,7 @@ startGameLoop:
 
 		client.expectedResult = expectedResult
 
+		client.write <- StartGame{}
 		client.write <- NewQuestion{
 			Difficulty: byte(client.difficulty),
 			Question:   question,
@@ -129,8 +138,7 @@ startGameLoop:
 			l.unregisterClient(c)
 
 		case <-l.done:
-			l.log("closing")
-			l.hub.unregisterLobby(l)
+			l.close()
 			return
 
 		}
@@ -151,6 +159,8 @@ func (l *Lobby) registerClient(c *Client) bool {
 
 	go c.readPump()
 
+	l.clients[c.id] = c
+
 	players := []Player{}
 	for _, client := range l.clients {
 		if !client.closed.Load() {
@@ -160,8 +170,6 @@ func (l *Lobby) registerClient(c *Client) bool {
 	}
 
 	c.write <- LobbyGreeting{Players: players}
-
-	l.clients[c.id] = c
 
 	l.activeClientCount.Add(1)
 	full := l.activeClientCount.Load() == ClientsPerLobby
@@ -176,7 +184,10 @@ func (l *Lobby) unregisterClient(c *Client) {
 
 	if l.activeClientCount.Load() == 0 {
 		l.log("all clients left")
-		close(l.done)
+		if !l.closed.Load() {
+			close(l.done)
+			l.closed.Store(true)
+		}
 	}
 }
 
@@ -193,6 +204,11 @@ func (l *Lobby) eliminationHandler() {
 
 	for range eliminationTimer.C {
 		if l.activeClientCount.Load() == 0 {
+			l.log("stopping elimination handler")
+			if !l.closed.Load() {
+				close(l.done)
+				l.closed.Store(true)
+			}
 			return
 		}
 
@@ -241,10 +257,6 @@ func (l *Lobby) eliminationHandler() {
 			c3.closed.Store(true)
 			l.broadcast(OpponentEliminated{byte(c3.id)})
 		}
-
-		if l.activeClientCount.Load() == 0 {
-			return
-		}
 	}
 }
 
@@ -272,67 +284,75 @@ func (l *Lobby) handleLobbyStatusEffect(cl ClientLobbyStatusEffect) {
 	}
 }
 
+func (l *Lobby) close() {
+	l.log("closing")
+	for _, client := range l.clients {
+		client.conn.Close()
+	}
+	l.hub.unregisterLobby(l)
+}
+
 // GenerateQuestion returns (question string, expectedResult)
 func GenerateQuestion(difficulty uint) (string, int) {
 	switch difficulty {
 	case 1: // one-digit add & sub
 		a, b := randInt(1, 9), randInt(1, 9)
 		if rand.IntN(2) == 0 {
-			return fmt.Sprintf("%d + %d", a, b), a + b
+			return fmt.Sprintf("%d + %d = ", a, b), a + b
 		}
-		return fmt.Sprintf("%d - %d", a, b), a - b
+		return fmt.Sprintf("%d - %d = ", a, b), a - b
 
 	case 2: // two-digit add & sub
 		a, b := randInt(10, 99), randInt(10, 99)
 		if rand.IntN(2) == 0 {
-			return fmt.Sprintf("%d + %d", a, b), a + b
+			return fmt.Sprintf("%d + %d = ", a, b), a + b
 		}
-		return fmt.Sprintf("%d - %d", a, b), a - b
+		return fmt.Sprintf("%d - %d = ", a, b), a - b
 
 	case 3: // one-digit mult
 		a, b := randInt(1, 9), randInt(1, 9)
-		return fmt.Sprintf("%d × %d", a, b), a * b
+		return fmt.Sprintf("%d × %d = ", a, b), a * b
 
 	case 4: // one & two-digit mult
 		a, b := randInt(1, 9), randInt(10, 99)
 		if rand.IntN(2) == 0 {
 			a, b = b, a
 		}
-		return fmt.Sprintf("%d × %d", a, b), a * b
+		return fmt.Sprintf("%d × %d = ", a, b), a * b
 
 	case 5: // one & two-digit div (integer only)
 		b := randInt(1, 9)
 		result := randInt(2, 9)
 		a := b * result
-		return fmt.Sprintf("%d ÷ %d", a, b), result
+		return fmt.Sprintf("%d ÷ %d = ", a, b), result
 
 	case 6: // three numbers one-digit mult add
 		a, b, c := randInt(1, 9), randInt(1, 9), randInt(1, 9)
 		if rand.IntN(2) == 0 {
-			return fmt.Sprintf("%d × %d + %d", a, b, c), a*b + c
+			return fmt.Sprintf("%d × %d + %d = ", a, b, c), a*b + c
 		}
-		return fmt.Sprintf("%d + %d × %d", a, b, c), a + b*c
+		return fmt.Sprintf("%d + %d × %d = ", a, b, c), a + b*c
 
 	case 7: // three-digit add & sub
 		a, b := randInt(100, 999), randInt(100, 999)
 		if rand.IntN(2) == 0 {
-			return fmt.Sprintf("%d + %d", a, b), a + b
+			return fmt.Sprintf("%d + %d = ", a, b), a + b
 		}
-		return fmt.Sprintf("%d - %d", a, b), a - b
+		return fmt.Sprintf("%d - %d = ", a, b), a - b
 
 	case 8: // 3 one-digit mults
 		a, b, c := randInt(1, 9), randInt(1, 9), randInt(1, 9)
-		return fmt.Sprintf("%d × %d × %d", a, b, c), a * b * c
+		return fmt.Sprintf("%d × %d × %d = ", a, b, c), a * b * c
 
 	case 9: // three and one-digit div (integer)
 		b := randInt(2, 9)
 		result := randInt(10, 99)
 		a := b * result
-		return fmt.Sprintf("%d ÷ %d", a, b), result
+		return fmt.Sprintf("%d ÷ %d = ", a, b), result
 
 	case 10: // two-digit mult
 		a, b := randInt(10, 99), randInt(10, 99)
-		return fmt.Sprintf("%d × %d", a, b), a * b
+		return fmt.Sprintf("%d × %d = ", a, b), a * b
 
 	default:
 		return "invalid difficulty", 0

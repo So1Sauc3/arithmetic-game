@@ -1,3 +1,5 @@
+import type { Player } from '@/lib/comm';
+import { usePage } from '@/PageProvider';
 import { useState, useEffect } from 'react';
 
 function GameInfo() {
@@ -96,18 +98,24 @@ function GameInfo() {
 }
 
 function PlayerList() {
+  const { players } = usePage();
   return (
     <div className="p-5 bg-gray-100/20 border-2 my-2 min-w-40">
         <h2 className="text-xl font-bold text-gray-200 mb-4">Players</h2>
         <div className="space-y-2 text-md text-white">
-          <div>Alex</div>
-          <div>Macsen</div>
+            {Object.entries(players).map(
+                (p: [string, Player]) =>
+                { return <div>
+                {p[1].name}
+                </div> }
+            )}
         </div>
     </div>
   );
 }
 
 export default function Lobby() {
+    const { socket } = usePage();
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-5">
@@ -123,6 +131,7 @@ export default function Lobby() {
       <div className="flex gap-4 max-w-4xl w-full">
         <PlayerList />
         <GameInfo />
+        <button onClick={(_) => socket.sendSkip()} className="bg-red-200">Skip Wait!</button>
       </div>
       <div className="max-w-4xl p-4 text-3xl mt-2 text-[#E8D8A1]">
         Waiting for more players...

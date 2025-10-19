@@ -26,6 +26,7 @@ const (
 	OpcodeOpponentEliminated
 	OpcodeOpponentScoreChanged
 	OpcodeMultipliersChanged
+	OpcodeStartGame
 )
 
 // -------- Helper Types --------
@@ -252,4 +253,14 @@ func (m MultipliersChanged) MarshalBinary() ([]byte, error) {
 	binary.BigEndian.PutUint32(data[1:], math.Float32bits(m.ScoreMult))
 	binary.BigEndian.PutUint32(data[5:], math.Float32bits(m.CoinMult))
 	return data, nil
+}
+
+// -------- Start Game --------
+
+type StartGame struct{}
+
+func (StartGame) Opcode() byte { return OpcodeStartGame }
+
+func (StartGame) MarshalBinary() ([]byte, error) {
+	return []byte{OpcodeStartGame}, nil
 }

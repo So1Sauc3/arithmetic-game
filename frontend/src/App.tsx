@@ -1,6 +1,7 @@
 // import { Routes, Route, Navigate } from 'react-router-dom'
 import { usePage, CurrentPage } from './PageProvider.tsx'
 import './App.css'
+import * as comm from './lib/comm.ts'
 
 import Login from './pages/Login'
 import Game from './pages/Game'
@@ -12,7 +13,7 @@ import { FloatingClouds } from './components/FloatingClouds'
 
 
 export default function App() {
-  // const [page, setPage] = useState<CurrentPage>(true)
+  (window as any).sockets = comm;
 
   const { page } = usePage()
   return (

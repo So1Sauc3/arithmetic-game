@@ -7,8 +7,8 @@ import { gsap } from 'gsap';
 interface TextTypeProps {
   // For equation input mode
   userInput?: string;
-  isInputActive?: boolean;
-  setIsInputActive?: (active: boolean) => void;
+  // isInputActive?: boolean;
+  // setIsInputActive?: (active: boolean) => void;
   className?: string;
   showCursor?: boolean;
   hideCursorWhileTyping?: boolean;
@@ -27,6 +27,7 @@ interface TextTypeProps {
   onSentenceComplete?: (sentence: string, index: number) => void;
   startOnVisible?: boolean;
   reverseMode?: boolean;
+  handleInputChange?: (e: React.ChangeEvent<HTMLInputElement>) => void,
 }
 
 const TextType = ({
@@ -49,8 +50,9 @@ const TextType = ({
   startOnVisible = false,
   reverseMode = false,
   userInput,
-  isInputActive,
-  setIsInputActive,
+  handleInputChange,
+  // isInputActive,
+  // setIsInputActive,
   ...props
 }: TextTypeProps & React.HTMLAttributes<HTMLElement>) => {
   const [displayedText, setDisplayedText] = useState('');
@@ -188,10 +190,10 @@ const TextType = ({
   const animationFinished = displayedText.length === textArray[currentTextIndex].length && !isDeleting;
 
   // Handler for user input (if enabled)
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (setIsInputActive) setIsInputActive(true);
-    if (props.onChange) props.onChange(e);
-  };
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (setIsInputActive) setIsInputActive(true);
+  //   if (props.onChange) props.onChange(e);
+  // };
 
   return createElement(
     Component,
@@ -204,15 +206,15 @@ const TextType = ({
       {displayedText}
     </span>,
     // User input field appears after animation is finished
-    userInput !== undefined && animationFinished && (
+    animationFinished && (
       <input
         ref={inputRef as React.RefObject<HTMLInputElement>}
         type="text"
-        value={userInput}
+        // value={userInput}
         onChange={handleInputChange}
-        className="ml-1 bg-transparent border-none outline-none text-inherit w-auto inline-block"
+        className="ml-1 bg-transparent border-none outline-none text-inherit w-auto inline-block max-w-[6ch]"
         autoFocus
-        style={{ width: `${Math.max(userInput.length, 1)}ch` }}
+        // style={{ width: `${Math.max(userInput.length, 1)}ch` }}
       />
     ),
     // Blinking cursor always at the end
