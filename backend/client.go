@@ -24,6 +24,8 @@ type Client struct {
 	write      chan ServerMessage
 	unregister chan *Client
 
+	statusEffects [StatusEffectCount]atomic.Bool
+
 	closed atomic.Bool
 
 	playing atomic.Bool
@@ -160,6 +162,12 @@ func (c *Client) readPump() {
 					Question:   question,
 					Difficulty: byte(c.difficulty),
 				}
+
+			case DoubleTapPowerup, CoinLeakPowerup, HardModePowerup:
+				c.read <- ClientLobbyStatusEffect{
+					ClientID: int(clientMessage.AffectedPlayer),
+					Powerup: clientMessage.PowerupID,
+				}
 			}
 
 			c.write <- PurchaseConfirmed{
@@ -203,6 +211,9 @@ func (c *Client) writePump() {
 	}
 	c.log("writePump closed")
 }
+
+// func (c *Client) doubleTapHandler() {
+// }
 
 func (c *Client) log(format string, v ...any) {
 	log.Printf("client %d: %s", c.id, fmt.Sprintf(format, v...))
