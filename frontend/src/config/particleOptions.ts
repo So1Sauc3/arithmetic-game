@@ -3,11 +3,6 @@ import type { ISourceOptions } from "@tsparticles/engine";
 // Options adapted from the provided config to match the installed tsparticles v3 API.
 export const particlesOptions = {
   fullScreen: { enable: false },
-  background: {
-    color: {
-      value: "#010621",
-    },
-  },
   fpsLimit: 60,
   particles: {
     color: { value: "#E8D8A1" },

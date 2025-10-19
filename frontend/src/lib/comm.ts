@@ -68,6 +68,7 @@ export type Player = {
     name: string
     statusEffects: StatusEffectId[]
     eliminated: boolean
+    score: number
 }
 
 export type HubHello = {
@@ -200,7 +201,7 @@ function parsePlayer(view: DataView, offset: number): [Player, number] {
     const nameBytes = new Uint8Array(view.buffer, view.byteOffset + offset, nameLen);
     const name = textDecoder.decode(nameBytes);
     offset += nameLen;
-    return [{ id: playerId, name, statusEffects: [], eliminated: false }, offset];
+    return [{ id: playerId, name, statusEffects: [], eliminated: false, score: 0 }, offset];
 }
 
 // Helper: parses status effect IDs
@@ -352,6 +353,7 @@ export type Socket = {
     onOpponentStatusChanged: (arg0: (arg0: OpponentStatusChanged) => void) => void,
     onEliminated: (arg0: (arg0: Eliminated) => void) => void,
     onOpponentEliminated: (arg0: (arg0: OpponentEliminated) => void) => void,
+    onOpponentScoreChanged: (arg0: (arg0: OpponentScoreChanged) => void) => void,
     onMultipliersChanged: (arg0: (arg0: MultipliersChanged) => void) => void,
     OnStartGame: (arg0: (arg0: StartGame) => void) => void,
     sendSubmit: (answer: number) => void
@@ -396,6 +398,7 @@ async function connect_raw(url: string): Promise<Socket> {
         onOpponentStatusChanged: (handler: (arg0: OpponentStatusChanged) => void) => callIfOpCode(handler, ServerOp.OpponentStatusChanged),
         onEliminated: (handler: (arg0: Eliminated) => void) => callIfOpCode(handler, ServerOp.Eliminated),
         onOpponentEliminated: (handler: (arg0: OpponentEliminated) => void) => callIfOpCode(handler, ServerOp.OpponentEliminated),
+        onOpponentScoreChanged: (handler: (arg0: OpponentScoreChanged) => void) => callIfOpCode(handler, ServerOp.OpponentScoreChanged),
         onMultipliersChanged: (handler: (arg0: MultipliersChanged) => void) => callIfOpCode(handler, ServerOp.MultipliersChanged),
         OnStartGame: (handler: (arg0: StartGame) => void) => callIfOpCode(handler, ServerOp.StartGame),
         sendSubmit: (answer: number) => { socket.send(serializeClientMessage({ opcode: ClientOp.Submit, answer })) },

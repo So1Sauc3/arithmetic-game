@@ -9,6 +9,7 @@ import Lobby from './pages/Lobby'
 
 import ParticlesBackground from './components/ParticlesBackground'
 import SmoothFollower from './components/SmoothFollower'
+import { FloatingClouds } from './components/FloatingClouds'
 
 
 export default function App() {
@@ -16,9 +17,10 @@ export default function App() {
 
   const { page } = usePage()
   return (
-      <div className="app-root">
+      <div className="app-root bg-gradient-to-b from-[#010621] via-[#0F3B86] to-[#d292b1]">
         {/* ParticlesBackground is rendered once and positioned behind everything */}
-        <ParticlesBackground />
+        <ParticlesBackground/>
+        <FloatingClouds />
         <SmoothFollower />
 
         <div className="app-content">

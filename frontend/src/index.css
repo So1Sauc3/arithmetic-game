@@ -1,6 +1,28 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Affair Regular font-face */
+@font-face {
+  font-family: 'Affair';
+  src: url('./fonts/Affair Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+/* Parismatchbright font-face */
+@font-face {
+  font-family: 'Parismatchbright';
+  src: url('./fonts/Parismatchbright-vnX4.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-affair: 'Affair', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-parismatch: 'Parismatchbright', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -174,6 +196,14 @@ h1 {
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+.font-affair {
+  font-family: var(--font-affair);
+}
+
+.font-parismatch {
+  font-family: var(--font-parismatch);
 }
 
 

@@ -118,7 +118,7 @@ export default function Lobby() {
     const { socket } = usePage();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-5">
+    <div className="w-screen h-screen relative overflow-hidden text-[#E8D8A1] flex flex-col items-center justify-center p-4">
       {/* <div className="flex justify-between items-center w-full max-w-4xl mb-8"> */}
       {/*   <h1 className="text-2xl font-bold text-white">Lobby</h1> */}
       {/*   <button  */}
@@ -133,7 +133,7 @@ export default function Lobby() {
         <GameInfo />
         <button onClick={(_) => socket.sendSkip()} className="bg-red-200">Skip Wait!</button>
       </div>
-      <div className="max-w-4xl p-4 text-3xl mt-2 text-[#E8D8A1]">
+      <div className="w-full p-4 text-3xl mt-2 text-[#E8D8A1]">
         Waiting for more players...
       </div>
     </div>

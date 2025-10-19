@@ -156,8 +156,8 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
             }}
           >
             <div className={`${itemClassName}`}>
-              <Plate className='w-full h-16 bg-[#000C44B2]' pathDataTemplate="M 0 0 H width V height H 0 Z">
-                <p className="text-white m-0">{item}</p>
+              <Plate className='w-full h-16 flex items-center justify-center' pathDataTemplate="M 8 0 H width-L1 h 56 l 8 8 V height-L1 v 56 l -8 8 H ts h -56 l -8 -8 V 8 l 8 -8 Z">
+                <p className="text-[#E8D8A1] font-parismatch text-lg m-0 mt-4.5">{item}</p>
               </Plate>
             </div>
           </AnimatedItem>
@@ -170,7 +170,7 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
             style={{ opacity: topGradientOpacity }}
           ></div>
           <div
-            className="absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-[#010621] to-transparent pointer-events-none transition-opacity duration-300 ease"
+            className="absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-[#d292b1] to-transparent pointer-events-none transition-opacity duration-300 ease"
             style={{ opacity: bottomGradientOpacity }}
           ></div>
         </>
