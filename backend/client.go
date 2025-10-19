@@ -67,7 +67,7 @@ func (c *Client) readPump() {
 
 		if err != nil {
 			c.log("error parsing client message: %+v", err)
-			break
+			continue
 		}
 
 		c.log("received client message: %d %T",

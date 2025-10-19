@@ -114,6 +114,8 @@ func ParseClientMessage(data []byte) (ClientMessage, error) {
 		msg = &Submission{}
 	case OpcodePowerup:
 		msg = &PowerupPurchase{}
+	case OpcodeSkipWait:
+		msg = &SkipWait{}
 	default:
 		return nil, fmt.Errorf("unknown opcode %d", data[0])
 	}
