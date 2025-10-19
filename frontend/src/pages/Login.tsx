@@ -18,6 +18,12 @@ function NameEntry() {
   const [name, setName] = useState('')
   const { setPage, connectSocket } = usePage();
 
+  const handleEnterLogin = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key == "Enter") {
+      await handleLogin()
+    }
+  }
+
   const handleLogin = async () => {
     console.log('Login button clicked');
     console.log('User entered name:', name);
@@ -32,6 +38,7 @@ function NameEntry() {
         placeholder="Display Name" 
         value={name}
         onChange={(e) => setName(e.target.value)}
+        onKeyDown={handleEnterLogin} 
         className="h-12 mb-5 mr-2 px-3 py-1 border border-gray-300 text-white"
       />
       <button 
