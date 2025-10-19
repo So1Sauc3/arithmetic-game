@@ -164,11 +164,11 @@ export default function Game() {
 
         // </Plate>
         <div className="w-screen h-screen relative overflow-hidden text-[#E8D8A1]">
-            <div className="w-[300px] h-full left-0 top-0 absolute bg-[#000A2233]">
-                <Plate className="w-full h-16 left-0 right-0 p-2 flex mb-2" pathDataTemplate="M 0 0 H width V height H 0 Z">
-                    <h4 className="w-full text-md text-slate-300 mb-2">Scoreboard</h4>
+            <div className="max-w-[300px] w-full h-full inline-flex flex-col left-0 top-0 absolute ">
+                <Plate className="w-full h-16 left-0 right-0 p-2 flex mb-2 bg-[#000A2233]" pathDataTemplate="M 8 0 H width-L1 h 56 l 8 8 V height-L1 v 56 l -8 8 H ts h -56 l -8 -8 V 8 l 8 -8 Z">
+                    <h4 className="w-full text-4xl font-parismatch text-[#E8D8A1] mb-2">Scoreboard</h4>
                 </Plate>
-                <Plate className="w-full h-full absolute flex left-0 right-0" pathDataTemplate="M 0 0 H width V height H 0 Z">
+                <Plate className="w-full h-full absolute flex left-0 right-0 bg-[#000A2233]" pathDataTemplate="M 8 0 H width-L1 h 56 l 8 8 V height-L1 v 56 l -8 8 H ts h -56 l -8 -8 V 8 l 8 -8 Z">
                     <div className="w-full h-full left-0 top-0 absolute">
                         <AnimatedList
                             className="overflow-y-auto"
@@ -182,36 +182,40 @@ export default function Game() {
             </div>
             
 
-            <Plate className="max-w-[calc(100vw-612px)] h-16 top-0 mx-auto flex items-center justify-around bg-[#000A2233]" pathDataTemplate="M 0 0 H width V height H 0 Z">
-                <div className="w-full flex justify-around text-2xl p-3">
-                    <StatisticsItem name="score" value={score} />
-                    <StatisticsItem name="coins" value={coin} />
-                    <StatisticsItem name="difficulty" value={difficulty} />
-                    <StatisticsItem name="timer" value={timer} />
-                </div>
-            </Plate>
+            <div className="max-w-[calc(100vw-614px)] w-full h-full inline-flex flex-col items-center justify-center">
+                <Plate className="w-full h-16 top-0 mx-auto flex items-center justify-around mb-2 bg-[#000A2233]" pathDataTemplate="M 8 0 H width-L1 h 56 l 8 8 V height-L1 v 56 l -8 8 H ts h -56 l -8 -8 V 8 l 8 -8 Z">
+                    <div className="w-full flex justify-around text-2xl p-3">
+                        <StatisticsItem name="score" value={score} />
+                        <StatisticsItem name="coins" value={coin} />
+                        <StatisticsItem name="difficulty" value={difficulty} />
+                        <StatisticsItem name="timer" value={timer} />
+                    </div>
+                </Plate>
 
-            <div className="max-w-[800px] mx-auto h-full flex flex-col items-center justify-center">
-                <div className="w-full text-center mb-6">
-                    <TextType
-                        text={equation}
-                        typingSpeed={40}
-                        initialDelay={100}
-                        className="text-8xl font-bold"
-                        userInput={inputValue}
-                        isInputActive={isInputActive}
-                        setIsInputActive={setIsInputActive}
-                        textColors={["#E8D8A1"]}
-                    />
+                <div className="w-full mx-auto h-full flex flex-col items-center justify-center">
+                    <Plate className="w-full h-full p-6" pathDataTemplate="M 8 8 h 48 l 8 -8 H width-L1 l 8 8 h 48 v 48 l 8 8 V height-L1 l -8 8 v 48 h -48 l -8 8 H ts l -8 -8 h -48 v -48 l -8 -8 V ts l 8 -8 Z">
+                        <div className="w-full h-full text-center mb-6">
+                            <TextType
+                                text={equation}
+                                typingSpeed={40}
+                                initialDelay={100}
+                                className="text-8xl font-bold"
+                                userInput={inputValue}
+                                isInputActive={isInputActive}
+                                setIsInputActive={setIsInputActive}
+                                textColors={["#E8D8A1"]}
+                            />
+                        </div>
+                    </Plate>
+                    {/* Input removed, user types directly in TextType */}
                 </div>
-                {/* Input removed, user types directly in TextType */}
             </div>
 
-            <div className="w-[300px] h-screen right-0 top-0 absolute bg-[#000A2233]">
-                <Plate className="w-full h-16 left-0 right-0 p-2 flex mb-2" pathDataTemplate="M 0 0 H width V height H 0 Z">
-                    <h4 className="w-full text-md text-slate-300 mb-2">Abilities</h4>
+            <div className="max-w-[300px] w-full h-full inline-flex flex-col right-0 top-0 absolute">
+                <Plate className="w-full h-16 left-0 right-0 p-2 flex mb-2 bg-[#000A2233]" pathDataTemplate="M 8 0 H width-L1 h 56 l 8 8 V height-L1 v 56 l -8 8 H ts h -56 l -8 -8 V 8 l 8 -8 Z">
+                    <h4 className="w-full text-4xl font-parismatch text-[#E8D8A1] mb-2">Abilities</h4>
                 </Plate>
-                <Plate className="w-full h-full left-0 right-0 p-2 flex" pathDataTemplate="M 0 0 H width V height H 0 Z">
+                <Plate className="w-full h-full left-0 right-0 p-2 flex bg-[#000A2233]" pathDataTemplate="M 8 0 H width-L1 h 56 l 8 8 V height-L1 v 56 l -8 8 H ts h -56 l -8 -8 V 8 l 8 -8 Z">
                     <div className="w-full h-full min-height:0 overflow-y-auto">
                         {abilities.map((a, i) => (
                             <AbilityCard
