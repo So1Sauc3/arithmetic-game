@@ -188,10 +188,10 @@ export default function Game() {
                 {/* Input removed, user types directly in TextType */}
             </div>
 
-            <div className="w-[300px] h-full right-0 top-0 absolute border border-[#E8D8A1]">
-                <div className="w-full h-[180px] top-0 absolute border-b border-[#E8D8A1] p-4">
-                    <h4 className="text-sm text-slate-300 mb-2">Statistics</h4>
-                    <div className="space-y-2">
+            <div className="w-[300px] h-full right-0 top-0 absolute border-2 border-[#E8D8A1] bg-[#000A2233]">
+                <div className="w-full h-[200px] top-0 absolute border-b-2 border-[#E8D8A1] p-2">
+                    <h4 className="text-md text-slate-300 mb-2">Statistics</h4>
+                    <div className="">
                         <StatisticsItem name="score" value={score} />
                         <StatisticsItem name="coin" value={coin} />
                         <StatisticsItem name="difficulty" value={difficulty} />
@@ -199,8 +199,8 @@ export default function Game() {
                     </div>
                 </div>
 
-                <div className="absolute top-[200px] left-0 right-0 p-4">
-                    <h4 className="text-sm text-slate-300 mb-2">Abilities</h4>
+                <div className="absolute top-[200px] left-0 right-0 p-2 overflow-y-auto">
+                    <h4 className="text-md text-slate-300 mb-2">Abilities</h4>
 
                     <div className="space-y-2">
                         {abilities.map((a, i) => (

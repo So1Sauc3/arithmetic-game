@@ -14,7 +14,6 @@ export default function App() {
   // const [page, setPage] = useState<CurrentPage>(true)
 
   const { page } = usePage()
-
   return (
       <div className="app-root">
         {/* ParticlesBackground is rendered once and positioned behind everything */}

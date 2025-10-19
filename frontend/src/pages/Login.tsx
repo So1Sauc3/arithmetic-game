@@ -37,7 +37,7 @@ function NameEntry() {
         className={`px-4 py-2 rounded text-white transition-all duration-150 active:scale-95 ${
           name.trim() 
             ? 'bg-blue-500 hover:bg-blue-600 cursor-pointer hover:scale-105' 
-            : 'bg-gray-400 cursor-not-allowed'
+            : 'bg-red-400 cursor-not-allowed'
         }`}
         onClick={handleLogin}
         disabled={!name.trim()}

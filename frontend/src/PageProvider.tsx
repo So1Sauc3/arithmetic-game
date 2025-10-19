@@ -14,7 +14,7 @@ type PageContextType = {
 const PageContext = createContext<PageContextType | undefined>(undefined);
 
 export function PageProvider({ children }: { children: React.ReactNode }) {
-  const [page, setPage] = useState(CurrentPage.Login);
+  const [page, setPage] = useState(CurrentPage.Game);
   return (
     <PageContext.Provider value={{ page, setPage }}>
       {children}
