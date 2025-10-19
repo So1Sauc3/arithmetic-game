@@ -278,61 +278,61 @@ func GenerateQuestion(difficulty uint) (string, int) {
 	case 1: // one-digit add & sub
 		a, b := randInt(1, 9), randInt(1, 9)
 		if rand.IntN(2) == 0 {
-			return fmt.Sprintf("%d + %d", a, b), a + b
+			return fmt.Sprintf("%d + %d = ", a, b), a + b
 		}
-		return fmt.Sprintf("%d - %d", a, b), a - b
+		return fmt.Sprintf("%d - %d = ", a, b), a - b
 
 	case 2: // two-digit add & sub
 		a, b := randInt(10, 99), randInt(10, 99)
 		if rand.IntN(2) == 0 {
-			return fmt.Sprintf("%d + %d", a, b), a + b
+			return fmt.Sprintf("%d + %d = ", a, b), a + b
 		}
-		return fmt.Sprintf("%d - %d", a, b), a - b
+		return fmt.Sprintf("%d - %d = ", a, b), a - b
 
 	case 3: // one-digit mult
 		a, b := randInt(1, 9), randInt(1, 9)
-		return fmt.Sprintf("%d × %d", a, b), a * b
+		return fmt.Sprintf("%d × %d = ", a, b), a * b
 
 	case 4: // one & two-digit mult
 		a, b := randInt(1, 9), randInt(10, 99)
 		if rand.IntN(2) == 0 {
 			a, b = b, a
 		}
-		return fmt.Sprintf("%d × %d", a, b), a * b
+		return fmt.Sprintf("%d × %d = ", a, b), a * b
 
 	case 5: // one & two-digit div (integer only)
 		b := randInt(1, 9)
 		result := randInt(2, 9)
 		a := b * result
-		return fmt.Sprintf("%d ÷ %d", a, b), result
+		return fmt.Sprintf("%d ÷ %d = ", a, b), result
 
 	case 6: // three numbers one-digit mult add
 		a, b, c := randInt(1, 9), randInt(1, 9), randInt(1, 9)
 		if rand.IntN(2) == 0 {
-			return fmt.Sprintf("%d × %d + %d", a, b, c), a*b + c
+			return fmt.Sprintf("%d × %d + %d = ", a, b, c), a*b + c
 		}
-		return fmt.Sprintf("%d + %d × %d", a, b, c), a + b*c
+		return fmt.Sprintf("%d + %d × %d = ", a, b, c), a + b*c
 
 	case 7: // three-digit add & sub
 		a, b := randInt(100, 999), randInt(100, 999)
 		if rand.IntN(2) == 0 {
-			return fmt.Sprintf("%d + %d", a, b), a + b
+			return fmt.Sprintf("%d + %d = ", a, b), a + b
 		}
-		return fmt.Sprintf("%d - %d", a, b), a - b
+		return fmt.Sprintf("%d - %d = ", a, b), a - b
 
 	case 8: // 3 one-digit mults
 		a, b, c := randInt(1, 9), randInt(1, 9), randInt(1, 9)
-		return fmt.Sprintf("%d × %d × %d", a, b, c), a * b * c
+		return fmt.Sprintf("%d × %d × %d = ", a, b, c), a * b * c
 
 	case 9: // three and one-digit div (integer)
 		b := randInt(2, 9)
 		result := randInt(10, 99)
 		a := b * result
-		return fmt.Sprintf("%d ÷ %d", a, b), result
+		return fmt.Sprintf("%d ÷ %d = ", a, b), result
 
 	case 10: // two-digit mult
 		a, b := randInt(10, 99), randInt(10, 99)
-		return fmt.Sprintf("%d × %d", a, b), a * b
+		return fmt.Sprintf("%d × %d = ", a, b), a * b
 
 	default:
 		return "invalid difficulty", 0
