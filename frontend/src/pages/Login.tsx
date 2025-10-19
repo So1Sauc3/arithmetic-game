@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { usePage, CurrentPage } from '../PageProvider'
 
 function Instructions() {
   return (
@@ -16,12 +16,12 @@ function Instructions() {
 
 function NameEntry() {
   const [name, setName] = useState('')
-  const navigate = useNavigate()
+  const { setPage } = usePage();
 
   const handleLogin = () => {
     console.log('Login button clicked');
     console.log('User entered name:', name);
-    navigate('/lobby')
+    setPage(CurrentPage.Lobby)
   }
 
   return (
