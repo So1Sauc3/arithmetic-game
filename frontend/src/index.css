@@ -176,6 +176,19 @@ h1 {
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+
+/* Firefox */
+.firefox\:textfield {
+  -moz-appearance: textfield;
+}
+
+/* WebKit browsers (Chrome, Safari, Edge, Opera) */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

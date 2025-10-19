@@ -64,6 +64,7 @@ function connect(
             setCoins(m.coins); setScore(m.score)
         });
         socket.onNewQuestion((m: NewQuestion) => {
+            // console.log("HEREREEREREE")
             setQuestion(m)
             setPage(CurrentPage.Game)
         });
