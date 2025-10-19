@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import type { CorrectSubmission, LobbyHello, NewPlayer, NewQuestion, Player, PurchaseConfirmed, Socket, StatusChanged, StatusEffectId, OpponentStatusChanged, OpponentEliminated, MultipliersChanged, StartGame} from './lib/comm.ts';
+import type { CorrectSubmission, LobbyHello, NewPlayer, NewQuestion, Player, PurchaseConfirmed, Socket, StatusChanged, StatusEffectId, OpponentStatusChanged, OpponentEliminated, MultipliersChanged, StartGame, OpponentScoreChanged} from './lib/comm.ts';
 import { connect as socketConnect } from './lib/comm.ts';
 
 export const enum CurrentPage {
@@ -89,6 +89,12 @@ function connect(
         socket.onOpponentStatusChanged((m: OpponentStatusChanged) => {
             setPlayers((i) => {
                 i[m.playerId].statusEffects = m.effects;
+                return i;
+            })
+        })
+        socket.onOpponentScoreChanged((m: OpponentScoreChanged) => {
+            setPlayers((i) => {
+                i[m.playerId].score = m.score;
                 return i;
             })
         })
