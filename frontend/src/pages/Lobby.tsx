@@ -1,41 +1,43 @@
-import type { Player } from '@/lib/comm';
-import { usePage } from '@/PageProvider';
-import { useState, useEffect } from 'react';
+import type { Player } from "@/lib/comm";
+import { usePage } from "@/PageProvider";
+import { useState, useEffect } from "react";
 
 function GameInfo() {
     const [currentTip, setCurrentTip] = useState(0);
-    
+
     const tips = [
         {
             icon: "🎮",
             title: "Game Duration",
-            description: "This is a 5 minute multiplayer math game"
+            description: "This is a 5 minute multiplayer math game",
         },
         {
             icon: "👥",
             title: "Player Count",
-            description: "There are up to 30 players in the Lobby"
+            description: "There are up to 30 players in the Lobby",
         },
         {
             icon: "📈",
             title: "Difficulty",
-            description: "Difficulty multiplier 1-10, increases every 5 questions"
+            description:
+                "Difficulty multiplier 1-10, increases every 5 questions",
         },
         {
             icon: "⚡",
             title: "Speed",
-            description: "Answer quickly! Faster responses earn more points"
+            description: "Answer quickly! Faster responses earn more points",
         },
         {
             icon: "🏆",
             title: "Scoring",
-            description: "Correct answers give points and coins"
+            description: "Correct answers give points and coins",
         },
         {
             icon: "🎯",
             title: "Strategy",
-            description: "Focus on accuracy first, then speed up as you get comfortable"
-        }
+            description:
+                "Focus on accuracy first, then speed up as you get comfortable",
+        },
     ];
 
     // Auto-advance tips every 5 seconds
@@ -58,35 +60,41 @@ function GameInfo() {
     return (
         <div className="w-100 p-5 bg-gray-100/20 border-2 border-blue-200 my-2">
             <h2 className="text-xl font-bold text-blue-200 mb-4">Game Tips</h2>
-            
+
             <div className="p-4 mb-4 h-[160px] flex flex-col justify-center">
                 <div className="text-center">
                     <div className="text-3xl mb-2">{tips[currentTip].icon}</div>
-                    <h3 className="font-bold text-lg text-gray-200 mb-2">{tips[currentTip].title}</h3>
-                    <p className="text-gray-100 leading-tight">{tips[currentTip].description}</p>
+                    <h3 className="font-bold text-lg text-gray-200 mb-2">
+                        {tips[currentTip].title}
+                    </h3>
+                    <p className="text-gray-100 leading-tight">
+                        {tips[currentTip].description}
+                    </p>
                 </div>
             </div>
 
             <div className="flex justify-between items-center">
-                <button 
+                <button
                     onClick={prevTip}
                     className="px-3 py-1 text-lg transition-colors text-white cursor-pointer"
                 >
                     ←
                 </button>
-                
+
                 <div className="flex space-x-1">
                     {tips.map((_, index) => (
                         <div
                             key={index}
                             className={`w-2 h-2 rounded-full ${
-                                index === currentTip ? 'bg-blue-200' : 'bg-gray-100/20'
+                                index === currentTip
+                                    ? "bg-blue-200"
+                                    : "bg-gray-100/20"
                             }`}
                         />
                     ))}
                 </div>
-                
-                <button 
+
+                <button
                     onClick={nextTip}
                     className="px-3 py-1 text-lg transition-colors text-white cursor-pointer"
                 >
@@ -98,44 +106,43 @@ function GameInfo() {
 }
 
 function PlayerList() {
-  const { players } = usePage();
-  return (
-    <div className="p-5 bg-gray-100/20 border-2 my-2 min-w-40">
-        <h2 className="text-xl font-bold text-gray-200 mb-4">Players</h2>
-        <div className="space-y-2 text-md text-white">
-            {Object.entries(players).map(
-                (p: [string, Player]) =>
-                { return <div>
-                {p[1].name}
-                </div> }
-            )}
+    const { players, socket } = usePage();
+    return (
+        <div className="flex flex-col justify-between p-5 bg-gray-100/20 border-2 my-2 min-w-40">
+            <h2 className="text-xl font-bold text-gray-200 mb-4">Players</h2>
+            <div className="space-y-2 text-md text-white flex-1 overflow-y-auto">
+                {Object.entries(players).map((p: [string, Player]) => (
+                    <div>{p[1].name}</div>
+                ))}
+            </div>
+
+
+            <button onClick={socket.sendSkip} className="cursor-pointer bg-gray-100/20 px-2 py-1 border-2 text-white">
+                Skip Wait
+            </button>
         </div>
-    </div>
-  );
+    );
 }
 
 export default function Lobby() {
-    const { socket } = usePage();
-
-  return (
-    <div className="w-screen h-screen relative overflow-hidden text-[#E8D8A1] flex flex-col items-center justify-center p-4">
-      {/* <div className="flex justify-between items-center w-full max-w-4xl mb-8"> */}
-      {/*   <h1 className="text-2xl font-bold text-white">Lobby</h1> */}
-      {/*   <button  */}
-      {/*     onClick={handleLeaveLobby} */}
-      {/*     className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors" */}
-      {/*   > */}
-      {/*     Leave Lobby */}
-      {/*   </button> */}
-      {/* </div> */}
-      <div className="flex gap-4 max-w-4xl w-full">
-        <PlayerList />
-        <GameInfo />
-        <button onClick={(_) => socket.sendSkip()} className="bg-red-200">Skip Wait!</button>
-      </div>
-      <div className="w-full p-4 text-3xl mt-2 text-[#E8D8A1]">
-        Waiting for more players...
-      </div>
-    </div>
-  )
+    return (
+        <div className="w-screen h-screen relative overflow-hidden text-[#E8D8A1] flex flex-col items-center justify-center p-4">
+            {/* <div className="flex justify-between items-center w-full max-w-4xl mb-8"> */}
+            {/*   <h1 className="text-2xl font-bold text-white">Lobby</h1> */}
+            {/*   <button  */}
+            {/*     onClick={handleLeaveLobby} */}
+            {/*     className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors" */}
+            {/*   > */}
+            {/*     Leave Lobby */}
+            {/*   </button> */}
+            {/* </div> */}
+            <div className="flex gap-4">
+                <PlayerList />
+                <GameInfo />
+            </div>
+            <div className="w-full p-4 text-3xl mt-2 text-[#E8D8A1]">
+                Waiting for more players...
+            </div>
+        </div>
+    );
 }

@@ -202,7 +202,7 @@ func (l *Lobby) eliminationHandler() {
 	eliminationTimer := time.NewTicker(30 * time.Second)
 
 	for range eliminationTimer.C {
-		if l.activeClientCount.Load() == 0 {
+		if l.activeClientCount.Load() <= 0 {
 			eliminationTimer.Stop()
 			l.log("stopping elimination handler")
 			if !l.closed.Load() {
