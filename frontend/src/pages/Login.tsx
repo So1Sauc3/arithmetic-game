@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { usePage, CurrentPage } from '../PageProvider'
-import Plate from '@/components/Plate';
+// import Plate from '@/components/Plate';
 
 function Instructions() {
   return (
