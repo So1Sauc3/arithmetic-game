@@ -34,15 +34,7 @@ function NameEntry() {
         className="h-12 mb-5 mr-2 px-3 py-1 border border-gray-300 text-white"
       />
       <button 
-<<<<<<< HEAD
-        className={`px-4 py-2 rounded text-white transition-all duration-150 active:scale-95 ${
-          name.trim() 
-            ? 'bg-blue-500 hover:bg-blue-600 cursor-pointer hover:scale-105' 
-            : 'bg-red-400 cursor-not-allowed'
-        }`}
-=======
         className="border-1 max-w-30 px-4 py-2 text-white transition-all duration-150 active:scale-95"
->>>>>>> f5e773a809c5ddcf09427f137cbe3af9648cc2c0
         onClick={handleLogin}
         disabled={!name.trim()}
       >
