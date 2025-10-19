@@ -193,7 +193,7 @@ export default function Game() {
                 </Plate>
 
                 <div className="w-full mx-auto h-full flex flex-col items-center justify-center">
-                    <Plate className="w-full h-full p-6" pathDataTemplate="M 8 8 h 48 l 8 -8 H width-L1 l 8 8 h 48 v 48 l 8 8 V height-L1 l -8 8 v 48 h -48 l -8 8 H ts l -8 -8 h -48 v -48 l -8 -8 V ts l 8 -8 Z">
+                    <Plate className="w-full h-full p-6" pathDataTemplate="M 8 8 h 48 l 8 -8 H width-L1 l 8 8 h 48 v 48 l 8 8 V height-L1 l -8 8 v 48 h -48 l -8 8 H ts l -8 -8 h -48 v -48 l -8 -8 V ts l 8 -8 v -48 Z M 32 0 v ts M 0 32 h ts M width-L.5 0 v ts M width ts-1/2 h -ts M width-L.5 height v -ts M width height-L.5 h -ts M ts-1/2 height v -ts M 0 height-L.5 h ts">
                         <div className="w-full h-full text-center mb-6">
                             <TextType
                                 text={equation}
