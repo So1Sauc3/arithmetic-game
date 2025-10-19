@@ -22,6 +22,7 @@ export const ClientOp = {
     Register: 0,
     Submit: 1,
     Purchase: 2,
+    SkipWait: 3,
 } as const
 
 export type RegisterMessage = {
@@ -40,7 +41,11 @@ export type PurchaseMessage = {
     targetId: number
 }
 
-export type ClientMessage = RegisterMessage | SubmitMessage | PurchaseMessage;
+export type SkipWaitMessage = {
+    opcode: typeof ClientOp.SkipWait
+}
+
+export type ClientMessage = RegisterMessage | SubmitMessage | PurchaseMessage | SkipWaitMessage;
 
 export const ServerOp = {
     HubHello: 0,
@@ -169,6 +174,12 @@ function serializeClientMessage(payload: ClientMessage): ArrayBuffer {
             view.setUint8(0, opcode);
             view.setUint8(1, payload.powerup);
             view.setUint8(2, payload.targetId);
+            return buffer;
+
+        case 3: // Skip Wait
+            buffer = new ArrayBuffer(1);
+            view = new DataView(buffer);
+            view.setUint8(0, opcode);
             return buffer;
 
         default:
@@ -334,6 +345,7 @@ export type Socket = {
     onMultipliersChanged: (arg0: (arg0: MultipliersChanged) => void) => void,
     sendSubmit: (answer: number) => void
     sendPurchase: (powerup: PowerupId, target: number) => void
+    sendSkip: () => void
 }
 
 async function connect_raw(url: string): Promise<Socket> {
@@ -376,6 +388,7 @@ async function connect_raw(url: string): Promise<Socket> {
         onMultipliersChanged: (handler: (arg0: MultipliersChanged) => void) => callIfOpCode(handler, ServerOp.MultipliersChanged),
         sendSubmit: (answer: number) => { socket.send(serializeClientMessage({ opcode: ClientOp.Submit, answer })) },
         sendPurchase: (powerup: PowerupId, targetId: number) => { socket.send(serializeClientMessage({ opcode: ClientOp.Purchase, powerup, targetId })) },
+        sendSkip: () => { socket.send(serializeClientMessage({ opcode: ClientOp.SkipWait })) },
     };
 }
 
