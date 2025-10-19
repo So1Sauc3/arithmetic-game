@@ -85,7 +85,7 @@ export default function Game() {
                 setInputValue((v) => v.slice(0, -1));
                 return;
             }
-            if (/^[0-9]$/.test(e.key)) {
+            if (/[-\d]/.test(e.key)) {
                 setInputValue((v) => v.length < 6 ? v + e.key : v); // max 6 digits
             }
         };
