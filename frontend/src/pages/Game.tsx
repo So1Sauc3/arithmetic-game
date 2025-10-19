@@ -12,7 +12,7 @@ function generateEquation() {
     const a = Math.floor(Math.random() * 12) + 1;
     const b = Math.floor(Math.random() * 12) + 1;
     const op = ['+', '-', '*'][Math.floor(Math.random() * 3)];
-    const expr = `${a} ${op} ${b} =`;
+    const expr = `${a} ${op} ${b} = `;
     // eslint-disable-next-line no-eval
     // safe-ish for small ints
     const answer = 0;
@@ -161,9 +161,7 @@ export default function Game() {
     return (
         <div className="w-screen h-screen relative overflow-hidden text-white">
             <div className="w-[300px] h-screen left-0 top-0 absolute border-[#E8D8A1] border-2">
-                <div className="p-4 border-b border-[#111]">
-                    <h3 className="text-lg font-semibold">Scoreboard</h3>
-                </div>
+                <h3 className="text-lg font-semibold py-5">Scoreboard</h3>
                 <AnimatedList
                     className="h-full"
                     items={scoreboardItems}
@@ -173,13 +171,19 @@ export default function Game() {
                 />
             </div>
 
+            <div className="max-w-[900px] mx-auto flex justify-around text-2xl border p-3 border-[#E8D8A1]">
+                <StatisticsItem name="score" value={score} />
+                <StatisticsItem name="coins" value={coin} />
+                <StatisticsItem name="difficulty" value={difficulty} />
+                <StatisticsItem name="timer" value={timer} />
+            </div>
             <div className="max-w-[800px] mx-auto h-full flex flex-col items-center justify-center">
                 <div className="w-full text-center mb-6">
                     <TextType
                         text={equation}
                         typingSpeed={40}
                         initialDelay={100}
-                        className="text-5xl font-bold"
+                        className="text-8xl font-bold"
                         userInput={inputValue}
                         isInputActive={isInputActive}
                         setIsInputActive={setIsInputActive}
@@ -189,18 +193,9 @@ export default function Game() {
             </div>
 
             <div className="w-[300px] h-full right-0 top-0 absolute border-2 border-[#E8D8A1] bg-[#000A2233]">
-                <div className="w-full h-[200px] top-0 absolute border-b-2 border-[#E8D8A1] p-2">
-                    <h4 className="text-md text-slate-300 mb-2">Statistics</h4>
-                    <div className="">
-                        <StatisticsItem name="score" value={score} />
-                        <StatisticsItem name="coin" value={coin} />
-                        <StatisticsItem name="difficulty" value={difficulty} />
-                        <StatisticsItem name="timer" value={timer} />
-                    </div>
-                </div>
 
-                <div className="absolute top-[200px] left-0 right-0 p-2 overflow-y-auto">
-                    <h4 className="text-md text-slate-300 mb-2">Abilities</h4>
+                <div className="overflow-y-auto">
+                    <h3 className="text-lg font-semibold py-5">Abilities</h3>
 
                     <div className="space-y-2">
                         {abilities.map((a, i) => (
