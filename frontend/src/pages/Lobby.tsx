@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { usePage, CurrentPage }  from  '../PageProvider'
 
 function GameInfo() {
     const [currentTip, setCurrentTip] = useState(0);
