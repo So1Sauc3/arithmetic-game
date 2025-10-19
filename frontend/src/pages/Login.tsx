@@ -18,7 +18,7 @@ function NameEntry() {
   const [name, setName] = useState('')
   const { setPage } = usePage();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     console.log('Login button clicked');
     console.log('User entered name:', name);
     setPage(CurrentPage.Lobby)

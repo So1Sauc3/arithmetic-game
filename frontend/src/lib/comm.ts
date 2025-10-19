@@ -8,7 +8,7 @@ export const Powerup = {
     HardMode: 6,
 } as const;
 
-type PowerupId = typeof Powerup[keyof typeof Powerup]
+export type PowerupId = typeof Powerup[keyof typeof Powerup]
 
 export const StatusEffect = {
     DoubleTap: 0,
@@ -16,7 +16,7 @@ export const StatusEffect = {
     HardMode: 2,
 } as const;
 
-type StatusEffectId = typeof StatusEffect[keyof typeof StatusEffect]
+export type StatusEffectId = typeof StatusEffect[keyof typeof StatusEffect]
 
 export const ClientOp = {
     Register: 0,
@@ -60,6 +60,8 @@ export const ServerOp = {
 export type Player = {
     id: number
     name: string
+    statusEffects: StatusEffectId[]
+    eliminated: boolean
 }
 
 export type HubHello = {
@@ -181,7 +183,7 @@ function parsePlayer(view: DataView, offset: number): [Player, number] {
     const nameBytes = new Uint8Array(view.buffer, view.byteOffset + offset, nameLen);
     const name = textDecoder.decode(nameBytes);
     offset += nameLen;
-    return [{ id: playerId, name }, offset];
+    return [{ id: playerId, name, statusEffects: [], eliminated: false }, offset];
 }
 
 // Helper: parses status effect IDs
