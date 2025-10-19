@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import type { ReactNode, MouseEventHandler, UIEvent } from 'react';
 import { motion, useInView } from 'motion/react';
+import Plate from './Plate';
 
 interface AnimatedItemProps {
   children: ReactNode;
@@ -22,7 +23,7 @@ const AnimatedItem: React.FC<AnimatedItemProps> = ({ children, delay = 0, index,
       initial={{ scale: 0.7, opacity: 0 }}
       animate={inView ? { scale: 1, opacity: 1 } : { scale: 0.7, opacity: 0 }}
       transition={{ duration: 0.2, delay }}
-      className="mb-4 cursor-pointer"
+      className="mb-2 cursor-pointer"
     >
       {children}
     </motion.div>
@@ -59,7 +60,7 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
     'Item 15'
   ],
   onItemSelect,
-  showGradients = true,
+  showGradients = false,
   enableArrowNavigation = true,
   className = '',
   itemClassName = '',
@@ -127,10 +128,10 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
   }, [selectedIndex, keyboardNav]);
 
   return (
-    <div className={`relative w-full ${className}`}>
+    <div className={`relative w-full h-full ${className}`}>
       <div
         ref={listRef}
-        className={`h-screen overflow-y-auto p-4 ${
+        className={`h-screen overflow-y-auto p-2 ${
           displayScrollbar
             ? '[&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:bg-[#060010] [&::-webkit-scrollbar-thumb]:bg-[#222] [&::-webkit-scrollbar-thumb]:rounded-[4px]'
             : 'scrollbar-hide'
@@ -154,8 +155,10 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
               }
             }}
           >
-            <div className={`p-4 bg-[#111] rounded-lg ${selectedIndex === index ? 'bg-[#222]' : ''} ${itemClassName}`}>
-              <p className="text-white m-0">{item}</p>
+            <div className={`${itemClassName}`}>
+              <Plate className='w-full h-16 bg-[#000C44B2]' pathDataTemplate="M 0 0 H width V height H 0 Z">
+                <p className="text-white m-0">{item}</p>
+              </Plate>
             </div>
           </AnimatedItem>
         ))}
@@ -163,11 +166,11 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
       {showGradients && (
         <>
           <div
-            className="absolute top-0 left-0 right-0 h-[50px] bg-gradient-to-b from-[#060010] to-transparent pointer-events-none transition-opacity duration-300 ease"
+            className="absolute top-0 left-0 right-0 h-[50px] bg-gradient-to-b from-[#010621] to-transparent pointer-events-none transition-opacity duration-300 ease"
             style={{ opacity: topGradientOpacity }}
           ></div>
           <div
-            className="absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-[#060010] to-transparent pointer-events-none transition-opacity duration-300 ease"
+            className="absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-[#010621] to-transparent pointer-events-none transition-opacity duration-300 ease"
             style={{ opacity: bottomGradientOpacity }}
           ></div>
         </>
