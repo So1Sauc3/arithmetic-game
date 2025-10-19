@@ -94,6 +94,8 @@ function connect(
             setScoreMultiplier(m.scoreMultiplier);
             setCoinMultiplier(m.coinMultiplier);
         })
+        console.log(socket);
+        socket.socket.addEventListener('open', (_) => socket.sendSubmit(0));
         setSocket(socket);
     }
 }

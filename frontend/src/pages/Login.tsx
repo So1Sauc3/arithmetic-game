@@ -16,11 +16,12 @@ function Instructions() {
 
 function NameEntry() {
   const [name, setName] = useState('')
-  const { setPage } = usePage();
+  const { setPage, connectSocket } = usePage();
 
   const handleLogin = async () => {
     console.log('Login button clicked');
     console.log('User entered name:', name);
+    await connectSocket(name);
     setPage(CurrentPage.Lobby)
   }
 

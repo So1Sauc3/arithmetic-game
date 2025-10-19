@@ -380,6 +380,7 @@ async function connect_raw(url: string): Promise<Socket> {
 }
 
 export async function connect(name: string): Promise<Socket> {
-    const proto = (window.location.protocol == "http:") ? "ws://" : "wss://"
-    return await connect_raw(`${proto}${window.location.host}/ws\?name=${name}`)
+    // const proto = (window.location.protocol == "http:") ? "ws://" : "wss://"
+    // return await connect_raw(`${proto}${window.location.host}/ws\?name=${name}`)
+    return await connect_raw("ws://127.0.0.1:8080/ws?name=" + name)
 }
