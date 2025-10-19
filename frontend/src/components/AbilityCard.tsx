@@ -19,10 +19,10 @@ const AbilityCard = forwardRef<HTMLDivElement, AbilityCardProps>(
                 <div
                     ref={ref}
                     onClick={onClick}
-                    className={`w-full cursor-pointer select-none bg-[#000C44B2] flex items-center gap-3 ${className}`}
+                    className={`w-full cursor-pointer select-none flex items-center gap-3 ${className}`}
                 >
                     <Plate className="w-full h-full flex-shrink-0" pathDataTemplate="M 0 0 H width V height H 0 Z">
-                        <div className="w-10 h-10 bg-[#000C44B2] flex items-center justify-center overflow-hidden">
+                        <div className="w-10 h-12 bg-[#000C44B2] flex items-center justify-center overflow-hidden">
                             {image ? <img src={image} alt={name} className="w-full h-full object-cover" /> : <div className="text-xs text-slate-400">img</div>}
                         </div>
                         <div className="flex-1 text-sm text-white flex items-center justify-between gap-4">

@@ -165,11 +165,13 @@ export default function Game() {
         // </Plate>
         <div className="w-screen h-screen relative overflow-hidden text-[#E8D8A1]">
             <div className="w-[300px] h-full left-0 top-0 absolute bg-[#000A2233]">
-                <Plate className="w-full h-full absolute left-0 right-0 p-2 overflow-y-auto" pathDataTemplate="M 0 0 H width V height H 0 Z">
-                    <div className="w-[300px] h-screen left-0 top-0 absolute">
-                        <h3 className="text-lg font-semibold py-5">Scoreboard</h3>
+                <Plate className="w-full h-16 left-0 right-0 p-2 flex mb-2" pathDataTemplate="M 0 0 H width V height H 0 Z">
+                    <h4 className="w-full text-md text-slate-300 mb-2">Scoreboard</h4>
+                </Plate>
+                <Plate className="w-full h-full absolute flex left-0 right-0" pathDataTemplate="M 0 0 H width V height H 0 Z">
+                    <div className="w-full h-full left-0 top-0 absolute">
                         <AnimatedList
-                            className="h-full"
+                            className="overflow-y-auto"
                             items={scoreboardItems}
                             itemClassName="cursor-pointer"
                             showGradients={true}
@@ -180,7 +182,7 @@ export default function Game() {
             </div>
             
 
-            <Plate className="max-w-[calc(100vw-612px)] top-0 mx-auto flex items-center justify-around bg-[#000A2233]" pathDataTemplate="M 0 0 H width V height H 0 Z">
+            <Plate className="max-w-[calc(100vw-612px)] h-16 top-0 mx-auto flex items-center justify-around bg-[#000A2233]" pathDataTemplate="M 0 0 H width V height H 0 Z">
                 <div className="w-full flex justify-around text-2xl p-3">
                     <StatisticsItem name="score" value={score} />
                     <StatisticsItem name="coins" value={coin} />
@@ -206,10 +208,10 @@ export default function Game() {
             </div>
 
             <div className="w-[300px] h-screen right-0 top-0 absolute bg-[#000A2233]">
-
-                <Plate className="w-full h-full left-0 right-0 p-2 flex" pathDataTemplate="M 0 0 H width V height H 0 Z">
+                <Plate className="w-full h-16 left-0 right-0 p-2 flex mb-2" pathDataTemplate="M 0 0 H width V height H 0 Z">
                     <h4 className="w-full text-md text-slate-300 mb-2">Abilities</h4>
-
+                </Plate>
+                <Plate className="w-full h-full left-0 right-0 p-2 flex" pathDataTemplate="M 0 0 H width V height H 0 Z">
                     <div className="w-full h-full min-height:0 overflow-y-auto">
                         {abilities.map((a, i) => (
                             <AbilityCard
