@@ -23,3 +23,9 @@ var Powerups = []Powerup{
 	CoinLeakPowerup:     {cost: 300},
 	HardModePowerup:     {cost: 500},
 }
+
+const (
+	StatusEffectDoubleTap uint16 = iota
+	StatusEffectQuickType
+	StatusEffectCount
+)
