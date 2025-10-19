@@ -98,6 +98,7 @@ function connect(
         })
         console.log(socket);
         socket.socket.addEventListener('open', (_) => socket.sendSubmit(0));
+        socket.socket.addEventListener('close', (_) => setPage(CurrentPage.Login));
         setSocket(socket);
     }
 }
