@@ -4,12 +4,14 @@ import './App.css'
 import Login from './pages/Login'
 import Game from './pages/Game'
 import ParticlesBackground from './components/ParticlesBackground'
+import SmoothFollower from './components/SmoothFollower'
 
 export default function App() {
   return (
     <div className="app-root">
       {/* ParticlesBackground is rendered once and positioned behind everything */}
       <ParticlesBackground />
+      <SmoothFollower />
 
       <div className="app-content">
         {/* <nav style={{borderBottom:'1px solid #ddd'}}>
