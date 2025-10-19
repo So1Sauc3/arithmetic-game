@@ -1,7 +1,6 @@
 "use client";
 
 import AnimatedList from "@/components/AnimatedList";
-import TextType from "@/components/TextType";
 import { useEffect, useMemo, useRef, useState } from "react";
 import StatisticsItem from "@/components/StatisticsItem";
 import AbilityCard from "@/components/AbilityCard";
@@ -106,7 +105,7 @@ export default function Game() {
             </div>
             <div className="max-w-[800px] mx-auto h-full flex flex-col items-center justify-center">
                 <div className="flex justify-center items-center w-full text-center mb-6 text-8xl">
-                    <p className="pr-5">{questionText}</p>
+                    <p className="pr-5 max-w-[30vw]">{questionText}</p>
                     <input
                         className="appearance-none firefox:textfield ml-1 bg-transparent border-none outline-none text-inherit w-auto inline-block max-w-[6ch]"
                         type="number"
