@@ -30,6 +30,7 @@ type Lobby struct {
 	done chan struct{}
 
 	open bool
+	closed atomic.Bool
 }
 
 func newLobby(id int, hub *Hub) *Lobby {
@@ -58,6 +59,7 @@ func (l *Lobby) run() {
 	l.log("running")
 
 	l.open = true
+	l.closed.Store(false)
 
 	startGameTimer := time.NewTimer(time.Minute)
 
@@ -181,7 +183,10 @@ func (l *Lobby) unregisterClient(c *Client) {
 
 	if l.activeClientCount.Load() == 0 {
 		l.log("all clients left")
-		close(l.done)
+		if !l.closed.Load() {
+			close(l.done)
+			l.closed.Store(true)
+		}
 	}
 }
 
@@ -198,7 +203,11 @@ func (l *Lobby) eliminationHandler() {
 
 	for range eliminationTimer.C {
 		if l.activeClientCount.Load() == 0 {
-			close(l.done)
+			l.log("stopping elimination handler")
+			if !l.closed.Load() {
+				close(l.done)
+				l.closed.Store(true)
+			}
 			return
 		}
 
@@ -246,11 +255,6 @@ func (l *Lobby) eliminationHandler() {
 			l.activeClientCount.Add(-1)
 			c3.closed.Store(true)
 			l.broadcast(OpponentEliminated{byte(c3.id)})
-		}
-
-		if l.activeClientCount.Load() == 0 {
-			close(l.done)
-			return
 		}
 	}
 }
