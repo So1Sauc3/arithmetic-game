@@ -5,6 +5,7 @@ import TextType from "@/components/TextType";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import StatisticsItem from "@/components/StatisticsItem";
 import AbilityCard from "@/components/AbilityCard";
+import Plate from "@/components/Plate";
 
 type Ability = { id: string; name: string; image?: string };
 
@@ -159,8 +160,11 @@ export default function Game() {
     }, [abilityCosts, coin, keymap]);
 
     return (
+        // <Plate className="" pathDataTemplate="M 0 0 H width V height H 0 Z">
+
+        // </Plate>
         <div className="w-screen h-screen relative overflow-hidden text-white">
-            <div className="w-[300px] h-screen left-0 top-0 absolute border-[#E8D8A1] border-2">
+            <div className="w-[300px] h-screen left-0 top-0 absolute">
                 <div className="p-4 border-b border-[#111]">
                     <h3 className="text-lg font-semibold">Scoreboard</h3>
                 </div>
@@ -188,8 +192,8 @@ export default function Game() {
                 {/* Input removed, user types directly in TextType */}
             </div>
 
-            <div className="w-[300px] h-full right-0 top-0 absolute border-2 border-[#E8D8A1] bg-[#000A2233]">
-                <div className="w-full h-[200px] top-0 absolute border-b-2 border-[#E8D8A1] p-2">
+            <div className="w-[300px] h-full right-0 top-0 absolute bg-[#000A2233]">
+                <Plate className="w-full h-[200px] top-0 absolute p-2" pathDataTemplate="M 0 0 H width V height H 0 Z">
                     <h4 className="text-md text-slate-300 mb-2">Statistics</h4>
                     <div className="">
                         <StatisticsItem name="score" value={score} />
@@ -197,9 +201,9 @@ export default function Game() {
                         <StatisticsItem name="difficulty" value={difficulty} />
                         <StatisticsItem name="timer" value={timer} />
                     </div>
-                </div>
+                </Plate>
 
-                <div className="absolute top-[200px] left-0 right-0 p-2 overflow-y-auto">
+                <Plate className="absolute left-0 right-0 p-2 overflow-y-auto" pathDataTemplate="M 0 0 H width V height H 0 Z">
                     <h4 className="text-md text-slate-300 mb-2">Abilities</h4>
 
                     <div className="space-y-2">
@@ -217,7 +221,7 @@ export default function Game() {
                             />
                         ))}
                     </div>
-                </div>
+                </Plate>
             </div>
         </div>
     );

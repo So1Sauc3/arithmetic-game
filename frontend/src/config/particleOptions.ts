@@ -24,7 +24,7 @@ export const particlesOptions = {
       enable: true,
       outModes: { default: "bounce" },
       random: false,
-      speed: 6,
+      speed: 3,
       straight: false,
     },
     number: {
